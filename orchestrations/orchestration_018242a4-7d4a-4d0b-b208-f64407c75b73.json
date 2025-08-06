@@ -1,0 +1,37 @@
+{
+  "orchestration_id": "018242a4-7d4a-4d0b-b208-f64407c75b73",
+  "timestamp": "2025-08-06T00:33:05.636525",
+  "user_query": "Create marketing campaign for new products",
+  "workflow": {
+    "agents": [
+      {
+        "agent_id": "campaign_planner_agent",
+        "activation_trigger": "after_upsell_discovery",
+        "directives": [
+          "Create targeted marketing campaign",
+          "Define campaign timeline and channels",
+          "Estimate conversion rates and revenue"
+        ],
+        "data_sources": [
+          "lead_funnel",
+          "products"
+        ],
+        "output_format": "json",
+        "dependencies": [
+          "upsell_discovery_agent"
+        ]
+      }
+    ],
+    "execution_order": [
+      "campaign_planner_agent"
+    ],
+    "final_synthesis": {
+      "agent_id": "synthesis_agent",
+      "directives": [
+        "Combine all agent outputs into executive summary",
+        "Provide actionable recommendations",
+        "Format for presentation"
+      ]
+    }
+  }
+}

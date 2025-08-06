@@ -1,0 +1,35 @@
+{
+  "orchestration_id": "b4f49e43-8e3e-420f-8b6e-c9f641580f7c",
+  "timestamp": "2025-08-06T00:33:05.539888",
+  "user_query": "Test initialization query",
+  "workflow": {
+    "agents": [
+      {
+        "agent_id": "operations_summary_agent",
+        "activation_trigger": "always",
+        "directives": [
+          "Generate comprehensive operations summary",
+          "Identify key performance indicators",
+          "Provide actionable insights"
+        ],
+        "data_sources": [
+          "installed_assets",
+          "lead_funnel"
+        ],
+        "output_format": "json",
+        "dependencies": []
+      }
+    ],
+    "execution_order": [
+      "operations_summary_agent"
+    ],
+    "final_synthesis": {
+      "agent_id": "synthesis_agent",
+      "directives": [
+        "Combine all agent outputs into executive summary",
+        "Provide actionable recommendations",
+        "Format for presentation"
+      ]
+    }
+  }
+}

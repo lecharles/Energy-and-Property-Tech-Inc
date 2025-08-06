@@ -1,0 +1,53 @@
+{
+  "orchestration_id": "5617f4a8-9af4-49ba-bdfc-e8e85d15748c",
+  "timestamp": "2025-08-06T00:33:05.584117",
+  "user_query": "Analyze Q2 2025 performance and plan Q3 2025 growth strategy",
+  "workflow": {
+    "agents": [
+      {
+        "agent_id": "operations_summary_agent",
+        "activation_trigger": "always",
+        "directives": [
+          "Generate Q2 2025 operations summary",
+          "Identify critical operational issues",
+          "Provide regional performance breakdown"
+        ],
+        "data_sources": [
+          "installed_assets",
+          "lead_funnel"
+        ],
+        "output_format": "json",
+        "dependencies": []
+      },
+      {
+        "agent_id": "upsell_discovery_agent",
+        "activation_trigger": "after_operations_summary",
+        "directives": [
+          "Find top upsell opportunities in EMEA region",
+          "Prioritize by potential value",
+          "Include customer context and justification"
+        ],
+        "data_sources": [
+          "installed_assets",
+          "products"
+        ],
+        "output_format": "json",
+        "dependencies": [
+          "operations_summary_agent"
+        ]
+      }
+    ],
+    "execution_order": [
+      "operations_summary_agent",
+      "upsell_discovery_agent"
+    ],
+    "final_synthesis": {
+      "agent_id": "synthesis_agent",
+      "directives": [
+        "Combine all agent outputs into executive summary",
+        "Provide actionable recommendations",
+        "Format for presentation"
+      ]
+    }
+  }
+}
