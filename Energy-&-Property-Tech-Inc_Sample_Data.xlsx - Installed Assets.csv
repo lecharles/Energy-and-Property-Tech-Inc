@@ -1,0 +1,19 @@
+Asset ID,Customer,Region,Location,Product Installed,Install Date,Last Maintenance,Service Contract,Status,Upsell Potential ($)
+A1104,Alpha Manufacturing,APAC,"Tokyo, JP",EnergyX Analytics Platform,2021-09-26,2023-06-02,Yes,Operational,30000
+A1010,United Government Complex,EMEA,"Paris, FR",DataShield DCIM Software,2021-02-26,2021-02-26,No,Operational,34000
+A1094,Nova Industrial Park,AMER,"Mexico City, Mexico",GreenVent Smart Ventilation,2018-07-14,2022-05-19,Yes,Under Maintenance,38000
+A1040,Skyline Properties,APAC,"Sydney, AU",EnergyX Analytics Platform,2020-09-11,2020-09-11,No,Operational,40000
+A1137,Future Housing Co,APAC,"Shanghai, CN",BuildingWise Management Suite,2020-05-06,2023-06-26,Yes,Operational,50000
+A1078,Helios Energy,APAC,"Tokyo, JP",PowerSecure Modular UPS,2017-06-20,2021-08-15,Yes,Maintenance Due,500000
+A1140,Apex Data Centers,AMER,"Los Angeles, USA",PowerSecure Modular UPS,2019-01-12,2022-01-24,Yes,Maintenance Due,523000
+A1023,GreenFields University,AMER,"Houston, USA",ClimaSense HVAC Optimization,2016-09-13,2023-12-12,Yes,Out of Service,530000
+A1088,Globex Corporation,EMEA,"Stockholm, SE",EcoGrid Microgrid Manager,2017-09-06,2023-07-05,Yes,Operational,530000
+A1124,GreenFields University,EMEA,"London, UK",PowerSecure Modular UPS,2015-11-03,2019-08-27,No,Obsolete,540000
+A1150,Quantum Labs,EMEA,"Dubai, UAE",EdgeMax Micro Data Center,2016-06-11,2016-06-11,No,Obsolete,600000
+A1117,Helios Energy,AMER,"Chicago, USA",EcoGrid Microgrid Manager,2017-06-11,2019-04-14,No,Obsolete,740000
+A1053,Eastern Telecom,AMER,"Houston, USA",EdgeMax Micro Data Center,2015-05-28,2019-03-10,No,Obsolete,750000
+A1056,Optima Properties,APAC,"Sydney, AU",EcoGrid Microgrid Manager,2015-06-09,2015-06-09,No,Obsolete,800000
+A1074,Globex Corporation,EMEA,"Berlin, DE",EdgeMax Micro Data Center,2016-03-07,2016-03-07,No,Obsolete,850000
+A1129,Dynatron Corp,EMEA,"Paris, FR",EdgeMax Micro Data Center,2017-01-07,2017-01-07,No,Obsolete,900000
+A1018,Blue Ocean Retail,AMER,"Toronto, Canada",PowerMax Smart Switchgear,2015-08-26,2018-04-05,No,Obsolete,950000
+A1090,Nova Industrial Park,AMER,"New York, USA",EdgeMax Micro Data Center,2015-08-11,2018-02-24,No,Obsolete,1000000

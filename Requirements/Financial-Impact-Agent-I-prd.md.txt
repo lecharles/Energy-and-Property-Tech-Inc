@@ -1,0 +1,115 @@
+# Financial Impact Agent – Product Requirements Document (PRD)
+
+## Background & Context
+
+Financial planning and analysis is crucial for a company that deals with complex projects and revenue streams like Energy & Property Tech Inc. Management often needs to understand the financial ramifications of business decisions: _What if we invest in a new product line? How will a price change affect revenue? Are we on track with our budget this quarter?_ Traditionally, answering these questions involves financial analysts building spreadsheets, performing scenario analysis, and presenting reports. This process can take days and requires manual number crunching.
+
+The company's financial data – income statements, balance sheets, cash flows – are available (e.g., in spreadsheets and accounting systems). However, not every manager can easily interpret these or project future changes quickly. There is an opportunity to democratize this analysis by putting an AI tool in the hands of decision-makers for quick "what-if" explorations and financial health checks.
+
+**Opportunity:** The Financial Impact Agent is envisioned as a **personal financial analyst AI**. It will instantly tap into financial data to answer queries and simulate scenarios. This helps executives and department heads make informed decisions on the fly (or at least do initial analysis before involving the finance team for deeper dive). It also ensures consistency in calculations and assumptions used for projections.
+
+## Objective / Job-to-be-Done
+
+The **Financial Impact Agent** is tasked with providing insight into how decisions or external factors impact the company's financials. Key jobs include: - **Scenario Simulation:** Allow users to ask hypothetical questions like, _"What if our revenue increases by 10% next quarter, what happens to net income?"_, _"How would a 5% increase in raw material costs affect our gross margin?"_. The agent will adjust relevant financial figures and show the projected outcome (while stating assumptions). - **Budget vs Actual Analysis:** If asked, _"Are we over or under budget this quarter on OpEx?"_ or _"How does Q2's performance compare to plan?"_, it can compare actual financials to budget targets (assuming it's given or can compute budget assumptions). - **KPI Calculation & Explanation:** It can compute financial metrics: e.g., gross margin %, current ratio, ROI on a project, etc., and explain what they mean. For instance, _"Our gross margin is 40%, which is slightly below last year's 45%, indicating higher COGS pressure."_ - **Financial Summary & Drill-down:** Provide summaries like _"Summarize our Q3 financial results"_ pulling top-line revenue, profit, key variances. And if needed, drill down: _"Why was net income down despite revenue up?"_ – it might identify expense spikes or margin drops. - **Assist in Decision Support:** When someone is considering an initiative (hiring, purchasing equipment, pricing changes), the agent helps quantify impact. E.g., _"We plan to hire 5 more engineers at $100k each, how will that affect our profitability?"_ – the agent adds $500k to OpEx and shows revised profit, possibly even reflecting on cash flow if applicable.
+
+## User Persona(s)
+
+- **Chief Financial Officer (CFO) / Finance Team:** They have the deepest understanding but can use the agent to quickly double-check calculations or to generate baseline analyses which they'll refine. The CFO might ask complex hypotheticals to stress test plans.
+- **CEO / General Manager:** May use it for quick answers without always going to finance team. E.g., _"If we acquire a small company with $5M revenue, how might that affect our yearly revenue and profit?"_
+- **Department Heads (Budget Owners):** Non-finance executives (like Head of Operations, Sales Director) who own budgets. They might ask, _"What's my department's current spending vs budget?"_ or _"If I increase my team's travel budget by 20%, how does that affect overall OpEx?"_. The agent helps them see the financial impact of departmental decisions.
+- **Investors or Board (Indirectly):** In a board meeting scenario, someone might use the agent to answer questions on the fly. (Though likely internal use, the CFO could use it as a preparation tool to simulate questions that might come up.)
+
+## Features and Functionality
+
+**1\. Financial Data Access and Understanding:** The agent has access to core financial statements (Income Statement, Balance Sheet, Cash Flow – as provided in data). It can retrieve values like revenue for a certain quarter, operating expenses, cash on hand, etc. It "understands" these concepts (e.g., knows revenue minus COGS = gross profit, etc.). This is foundational for all other features.
+
+**2\. Scenario Modeling:** Users can modify one or multiple variables and see effect: - If user says _"Project a scenario: revenue +10%, COGS +5% next quarter"_, the agent will output something like: - _"Projected Revenue: $X (10% higher), Projected COGS: $Y (+5%), Gross Profit: $Z (which is a gross margin of A% vs B% current), Net Income: ... etc."_ - It will clearly state assumptions (e.g., keep other expenses constant, no tax change, etc., unless asked otherwise). - Could allow multi-year projections if data and assumptions available (maybe beyond current scope, but at least year-end projections within the year).
+
+**3\. Comparative Analysis:** - The agent can compare two scenarios or time periods. E.g., _"Compare Q2 2025 to Q2 2024 financials"_ → highlights growth or decline in each major line item. - _"Budget vs Actual for H1 2025"_ (if budget data is input; if not, maybe out of scope for initial version). - It can highlight variances: _"We spent $5M more on OpEx than last year due to increased R&D headcount."_
+
+**4\. Financial Metric Calculation:** On request: - Compute things like _EBITDA, Profit margin, Current ratio, Debt-to-equity, Cash burn rate,_ etc., using available data. - Possibly compute more specific KPIs (like _"What's the customer lifetime value if…?"_ if given needed inputs). - Each metric answer should come with a short interpretation: _"Our current ratio is 2.5, indicating a healthy liquidity (we have 2.5x more current assets than current liabilities)."_
+
+**5\. Natural Language Explanations:** The agent should not just spit numbers; it provides narrative insights as a financial analyst would: - _"Net income decreased despite revenue growth because operating expenses grew faster, particularly in R&D (increased hiring)."_ - _"Increasing salaries will raise OpEx, which will lower net income by the same amount if all else equal. In your scenario, net income would drop from $X to $Y, a Z% decrease."_ - This explanatory power is key for non-finance users to understand the data.
+
+**6\. Multi-turn Q&A on Financials:** Users can carry a conversation: - User: _"Show Q3 financial summary."_ (Agent gives rev, gross profit, etc.) - User: _"Why was our cash flow negative in Q2?"_ (Agent sees cash flow statement Q2: maybe large investment outflow or debt payment, and explains.) - User: _"What if we hadn't made that investment?"_ (Agent can hypothetical remove that outflow and show cash would be X higher.) - This memory of context and linking between statements (income vs cash flow vs balance sheet) is an advanced but powerful feature.
+
+**7\. Fast MCP Integration:** The agent leverages Fast MCP tools for seamless data access: - **FinancialDataTool:** Access income statement, balance sheet, and cash flow data - **ClaudeCodeTool:** Kick off Claude Code instances for complex financial modeling - **Real-time Data Access:** Connect to live financial data sources via Fast MCP connectors
+
+**8\. Orchestration Integration:** The agent works within the o3 orchestration system: - **JSON Specification Compliance:** Follows directives from orchestration specifications - **Structured Output:** Produces standardized JSON responses for workflow integration - **Dependency Management:** Handles dependencies with other agents in the workflow
+
+## Technical Implementation
+
+### Fast MCP Integration
+```python
+from fast_mcp import FastMCPTool, DataConnector
+from langgraph.graph import StateGraph, END
+from typing import TypedDict, Annotated
+
+class FinancialImpactAgent(BaseAgent):
+    def __init__(self, fast_mcp_client):
+        self.mcp_client = fast_mcp_client
+        self.financial_tool = FinancialDataTool()
+        self.claude_code_tool = ClaudeCodeTool()
+    
+    async def execute(self, directives: list, data_sources: list) -> dict:
+        # Use Fast MCP tools to access data
+        income_statement = await self.mcp_client.financial_data.query_financials("income_statement", "Q2 2025")
+        balance_sheet = await self.mcp_client.financial_data.query_financials("balance_sheet", "Q2 2025")
+        cash_flow = await self.mcp_client.financial_data.query_financials("cash_flow", "Q2 2025")
+        
+        # Process data according to directives
+        impact_analysis = self.project_campaign_impact(income_statement, balance_sheet, cash_flow, directives)
+        
+        return self.format_output(impact_analysis)
+    
+    def project_campaign_impact(self, income_data: dict, balance_data: dict, cash_data: dict, directives: list) -> dict:
+        # Implementation for projecting financial impact
+        pass
+```
+
+### LangGraph Integration
+```python
+from langgraph.graph import StateGraph, END
+from typing import TypedDict, Annotated
+import operator
+
+# Worker state for financial agent
+class FinancialWorkerState(TypedDict):
+    agent_id: str
+    directives: List[str]
+    data_sources: List[str]
+    agent_outputs: Annotated[dict, operator.add]
+
+def financial_impact_agent(state: FinancialWorkerState):
+    """Financial Impact Agent worker"""
+    
+    # Execute agent logic
+    agent = FinancialImpactAgent(fast_mcp_client)
+    result = await agent.execute(state["directives"], state["data_sources"])
+    
+    return {"agent_outputs": {state["agent_id"]: result}}
+```
+
+### Orchestration Compliance
+The agent follows the JSON orchestration specification:
+- **Activation Trigger:** Responds to orchestration directives
+- **Data Sources:** Uses specified CSV files through Fast MCP connectors
+- **Output Format:** Produces structured JSON for workflow integration
+- **Dependencies:** Handles dependencies with other agents
+
+## Features out-of-scope (for clarity)
+
+- **Detailed Valuation or External Market Analysis:** The agent focuses on internal financials, not performing full DCF valuations or stock price predictions.
+- **Accounting Advice:** It won't decide how to account for something (that's for accountants), but rather analyze numbers given.
+
+## Success Criteria / Metrics
+
+- **Accuracy of Calculations:** This is paramount. The agent's arithmetic and data retrieval must be correct. We will test various scenarios and questions against known manual calculations. Target: 0 computational errors in production use (with thorough validation during development).
+- **Adoption by Decision Makers:** Ideally, the CFO and other leaders start relying on the agent for quick answers. A success metric: number of queries per week by executives. If in a management meeting, people actively pull out the agent for answers, that's a cultural win. Perhaps aim for, say, CFO uses in every monthly review, etc.
+- **Decision Impact Frequency:** How often does using the agent influence a decision? E.g., CFO decided to alter a plan after seeing an agent scenario result. These might be anecdotal but we can collect stories. The more the agent informs decisions, the better.
+- **Reduction in Ad-hoc Analysis requests:** The finance team often gets ad-hoc requests ("Can you run this scenario for me?"). If the agent can handle these, the finance team should see fewer trivial requests. We can track that by asking them if their workload for quick calcs dropped.
+- **User Satisfaction and Trust:** Do users trust the answers? We'll gather feedback from initial users. If there's hesitation or if they always double-check manually, we haven't hit trust. We need the agent to be known as reliable (though probably they'll verify important things at first). A metric could be survey-based or simply the sentiment over time as confidence builds.
+- **Breadth of Usage:** The agent should be able to handle a broad set of questions. If too many questions end up with "I don't know" or irrelevant answers, it fails usefulness. We can monitor unanswered query types and refine. Goal: handle >90% of typical financial query types within its scope.
+- **Orchestration Integration:** Successfully integrates with o3 orchestration system and produces valid JSON outputs for workflow integration. Target: 100% orchestration compliance.
+
+Ultimately, the Financial Impact Agent is successful if it becomes a kind of _financial dashboard conversational interface_, where anyone who needs to understand the numbers or test a hypothesis can do so instantly and accurately, without waiting for a spreadsheet model from finance. When strategy meetings involve asking the AI "what if" and trusting its answers as a starting point, we'll know this tool has been fully embraced through seamless Fast MCP integration and orchestration compliance.

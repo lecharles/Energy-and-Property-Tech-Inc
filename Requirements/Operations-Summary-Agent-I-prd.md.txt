@@ -1,0 +1,103 @@
+# Operations Summary Agent – Product Requirements Document (PRD)
+
+## Background & Context
+
+Energy & Property Tech Inc. operates in the **energy and infrastructure** domain, deploying solutions like microgrid controllers, EV charging infrastructure, and smart building systems. The company's operations involve project installations, maintenance services, and product performance monitoring across various regions. Keeping track of operational performance is critical – leadership and operations teams need to know how projects are progressing, if service level agreements are met, and where any bottlenecks or issues exist.
+
+Currently, operational data is spread across monthly reports, Excel sheets, and various dashboards (for installations, maintenance tickets, etc.). Generating a concise summary (e.g., a weekly or monthly operations report) often requires manual work: collecting KPIs like number of installations, uptime metrics, support incidents, customer satisfaction, etc., and then interpreting them. This is time-consuming and can lead to inconsistent insights.
+
+**Opportunity:** The Operations Summary Agent is conceived to automate and standardize operational reporting. By having an AI that can instantly digest all relevant operational data and surface the key points, the company can ensure that everyone from the COO to project managers has a clear and up-to-date picture of operations. This agent acts as an _AI Operations Analyst_, ready to answer questions or produce reports on-demand.
+
+## Objective / Job-to-be-Done
+
+The **Operations Summary Agent**'s core objective is to provide **comprehensive, accurate, and timely summaries** of operational performance. It should be able to: - **Summarize Operational Data:** Combine multiple data points (installations completed, in-progress projects, maintenance events, system uptimes, etc.) into a human-readable summary. For example, produce a _"Last Week Operations Highlights"_ report. - **Highlight Issues & Risks:** Proactively identify anything that went wrong or could threaten operational KPIs – e.g., _"Two projects are delayed beyond their deadline"_ or _"Maintenance tickets increased 20% this month"_. - **Answer Ad-hoc Queries:** Respond to specific questions from users, such as "How many installations did we do in Q2 in the EMEA region?" or "What was the average system downtime in July?". It should fetch the data and present the answer clearly. - **Track Trends:** Provide insight into trends over time (where applicable). For instance, if asked, it can indicate _"We're seeing a rising trend in maintenance calls in APAC region month-over-month."_
+
+In essence, the job-to-be-done is acting as an **operations intelligence assistant** that transforms raw operations data into actionable information and situational awareness for decision-makers.
+
+## User Persona(s)
+
+- **Operations Manager:** Interested in weekly updates on project deployment status and resource utilization. This user might ask for summaries to brief their team or to adjust operational plans.
+- **Chief Operating Officer (COO):** Needs high-level monthly or quarterly performance overviews. The COO persona cares about key metrics (installations vs targets, downtime, efficiency) and major issues that require executive attention.
+- **Project Lead/Engineer:** Might use the agent to query specific project metrics (e.g., _"Are there any delays in the solar farm installation project?"_) or to get quick stats without digging through logs.
+- **Customer Support Lead:** (Secondary) May ask the agent about operational issues affecting customers (like _"How many critical outages occurred this month and which clients were affected?"_), to correlate with support tickets.
+
+Each persona expects the agent to deliver relevant information at the appropriate level of detail: from high-level KPIs for executives to granular data for on-the-ground managers, always with accuracy and clarity.
+
+## Features and Functionality
+
+**1\. Automated Operations Summary Reports:** The agent can generate summaries for a given time period (daily, weekly, monthly, or custom range). These reports include: - **Key Performance Indicators (KPIs):** e.g., number of new installations completed, percentage on-time vs delayed, system uptime %, number of maintenance incidents, average resolution time, etc. - **Achievements:** e.g., _"Launched 3 new microgrid systems in Q2, including our first in South America."_ - **Incidents/Problems:** e.g., _"Experienced 1 major outage at XYZ facility (4 hours downtime) due to inverter failure."_ - **Resource Utilization:** (if data available) e.g., _"Deployment team operating at 90% capacity."_ - **Comparisons:** vs previous period or targets (growth or decline, hitting goals or not).
+
+**2\. Queryable Metrics:** Users can ask specific questions: - _"List all installations completed last month by region."_ → The agent will output a breakdown per region. - _"What's the current project delay rate?"_ → It calculates how many active projects are behind schedule. - _"Give me the uptime for Product X in the last 30 days."_ → It fetches that product's performance log summary. These on-demand queries are answered with data-backed responses, often with brief context or interpretation (e.g., "uptime was 99.5%, which meets our SLA").
+
+**3\. Alerts & Anomaly Detection:** The agent should flag unusual patterns. If, say, maintenance incidents spiked dramatically in a week, the agent might add a cautionary note: _"Maintenance calls were 50% higher than average – needs investigation."_ Similarly, if a particular region consistently lags in deployments, it would highlight that trend.
+
+**4\. Multi-format Output:** By default, the summary is in text form. However, the agent can format data in **tables** or **bullet lists** for clarity when listing numbers or multiple items (e.g., a table of installations by region, or a bullet list of top 3 issues this week). This makes the output easy to read. (While primarily a text-based agent, it could also interface with tools to generate charts if asked, but initially we keep it to textual/tabular outputs.)
+
+**5\. Drill-down Capability:** After a summary, users often have follow-up questions. The agent is designed to handle _drill-downs_. E.g., the agent gives a monthly summary, and the user asks, _"Tell me more about the delayed projects mentioned."_ The agent will then retrieve details of those specific projects (like names, how long delayed, causes if available). This is facilitated by the system's memory and the agent's ability to filter data based on previous summary context.
+
+**6\. Fast MCP Integration:** The agent leverages Fast MCP tools for seamless data access: - **OperationalDataTool:** Access installed assets, lead funnel, and product data - **ClaudeCodeTool:** Kick off Claude Code instances for complex data analysis - **Real-time Data Access:** Connect to live data sources via Fast MCP connectors
+
+**7\. Orchestration Integration:** The agent works within the o3 orchestration system: - **JSON Specification Compliance:** Follows directives from orchestration specifications - **Structured Output:** Produces standardized JSON responses for workflow integration - **Dependency Management:** Handles dependencies with other agents in the workflow
+
+## Technical Implementation
+
+### Fast MCP Integration
+```python
+from fast_mcp import FastMCPTool, DataConnector
+
+class OperationsSummaryAgent(BaseAgent):
+    def __init__(self, fast_mcp_client):
+        self.mcp_client = fast_mcp_client
+        self.operational_tool = OperationalDataTool()
+        self.claude_code_tool = ClaudeCodeTool()
+    
+    async def execute(self, directives: list, data_sources: list) -> dict:
+        # Use Fast MCP tools to access data
+        installed_assets = await self.mcp_client.operational_data.get_upsell_opportunities()
+        lead_funnel = await self.mcp_client.operational_data.get_lead_funnel_data()
+        
+        # Process data according to directives
+        summary = self.generate_operations_summary(installed_assets, lead_funnel)
+        
+        return self.format_output(summary)
+    
+    def generate_operations_summary(self, assets_data: dict, funnel_data: dict) -> dict:
+        # Implementation for generating operations summary
+        pass
+```
+
+### LangGraph Integration
+```python
+from langgraph.graph import StateGraph, END
+from typing import TypedDict, Annotated
+import operator
+
+# Worker state for operations agent
+class OperationsWorkerState(TypedDict):
+    agent_id: str
+    directives: List[str]
+    data_sources: List[str]
+    agent_outputs: Annotated[dict, operator.add]
+
+def operations_summary_agent(state: OperationsWorkerState):
+    """Operations Summary Agent worker"""
+    
+    # Execute agent logic
+    agent = OperationsSummaryAgent(fast_mcp_client)
+    result = await agent.execute(state["directives"], state["data_sources"])
+    
+    return {"agent_outputs": {state["agent_id"]: result}}
+```
+
+### Orchestration Compliance
+The agent follows the JSON orchestration specification:
+- **Activation Trigger:** Responds to orchestration directives
+- **Data Sources:** Uses specified CSV files through Fast MCP connectors
+- **Output Format:** Produces structured JSON for workflow integration
+- **Dependencies:** Handles dependencies with other agents
+
+## Success Criteria / KPIs
+
+To measure the success and effectiveness of the Operations Summary Agent, we will track: - **Accuracy of Information:** The agent's summaries and answers must match the actual data records. We can verify this by comparing a sample of agent-generated reports against manually compiled reports. Target: >95% accuracy on key numbers. - **User Engagement & Satisfaction:** Through user feedback surveys or ratings after an answer. If managers find the summaries useful and save time, that's success. Target: a high satisfaction score (e.g., 4.5/5). - **Adoption Rate:** How often are users (Ops managers, COO, etc.) using the agent instead of manual reporting? If the agent is truly saving time, we expect frequent use. E.g., number of queries per week, or number of regular report requests. A goal could be that the weekly ops meeting report is generated by the AI 100% of the time after launch. - **Reduction in Manual Effort:** Measured by hours saved. If previously an analyst spent 3 hours/week compiling ops data, and now the agent does it in seconds, that's a tangible ROI. We can survey the team on how their workflows changed. - **Breadth of Questions Answered:** The agent should handle a wide range of operations queries. We'll log unanswered or misinterpreted questions to see if the coverage is improving over time as we refine it. Success looks like the agent can confidently handle >90% of typical operations-related questions posed to it. - **Timeliness:** The agent should provide up-to-date info. If data is updated through a certain date, the agent's answers should reflect that. We'll monitor whether any summary is outdated or if there were instances of missing the latest data. The goal is near real-time accuracy (within the constraints of data refresh schedules). - **Orchestration Integration:** Successfully integrates with o3 orchestration system and produces valid JSON outputs for workflow integration. Target: 100% orchestration compliance.
+
+In summary, the Operations Summary Agent succeeds when it becomes the _go-to assistant_ for operations intelligence in the company – trusted for its accuracy, regularly used by its intended users, and demonstrably saving time and improving situational awareness through seamless Fast MCP integration and orchestration compliance.

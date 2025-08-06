@@ -1,0 +1,202 @@
+# Energy & Property Tech Inc. Multi‑Agent AI System – Product Requirements Document (PRD)
+
+## Project Overview & Goal
+
+Energy & Property Tech Inc. is developing a **multi‑agent AI assistant** to improve decision-making and operational efficiency across the business. The goal is to empower teams in Operations, Sales, Marketing, and Finance with AI-driven insights and automation. By leveraging **multiple specialized AI agents** coordinated through an orchestrator, the system can handle complex, cross-functional queries that a single agent could not easily manage alone. This AI system will serve as a "co-pilot" for internal users, providing on-demand analyses, summaries, and recommendations in key business domains.
+
+Key objectives of the project include: - **Timely Insights:** Provide near real-time summaries and analysis of operational data, financial metrics, sales opportunities, and marketing performance. - **Decision Support:** Help staff and executives explore _"what-if"_ scenarios (e.g. financial impact of decisions) and uncover opportunities (e.g. upsell targets, campaign ideas) that might be overlooked. - **Efficiency & Consistency:** Automate routine reporting and planning tasks (like weekly operation summaries or campaign drafting) with a consistent, data-driven approach, freeing up employees for higher-level work. - **Integrated Experience:** Offer a single chat interface for users, behind which multiple AI agents work in concert. The user shouldn't need to invoke each agent manually – the system should understand the request and route it to the appropriate expert agent.
+
+## Approach: Multi‑Agent AI with Fast MCP, o3 Orchestration & LangGraph
+
+Our solution uses a combination of advanced AI models and frameworks: - **OpenAI o3 Orchestrator:** We use o3 as the primary orchestrator that interprets user requests and generates JSON specifications for agent activation. o3 excels at understanding complex queries and breaking them down into structured workflows. - **Fast MCP Framework:** We leverage Fast MCP for rapid development of MCP servers and tools. Fast MCP provides a streamlined approach to creating MCP tools with built-in data connectors, validation, and error handling. This enables our agents to seamlessly access external data sources and perform actions. - **Anthropic Claude (Specialized Agents):** Claude models are employed as specialized agents for tasks requiring _extensive context_ or heavy data lifting. Claude offers an expanded context window (up to **100K tokens**, ~75k words) allowing it to digest very large documents (even entire financial statements) in one go. - **LangGraph for Workflow Management:** The system uses **LangGraph** to orchestrate the multi-agent workflow execution. LangGraph acts as the "execution engine" of our AI team – it takes the JSON orchestration specification from o3 and manages the flow of data between agents, ensuring proper sequencing and error handling. - **Claude Code MCP Integration:** We integrate Claude Code as an MCP tool that allows agents to kick off instances of Claude Code for exploratory data analysis and code generation tasks.
+
+**Why Multi-Agent with Fast MCP?** Each agent in the system is specialized for a particular domain or task. This specialization improves performance and relevance: the agent can use a custom knowledge base, tools, and prompting tailored to its domain. The o3 orchestrator ensures these specialists work together smoothly by generating precise JSON specifications. Fast MCP provides the infrastructure for rapid tool development and integration. For instance, if a user asks a broad question like _"Summarize last quarter's operations and tell me how we can increase revenue next quarter,"_ o3 will generate a JSON specification that activates the Operations Summary Agent and the Upsell Discovery Agent, then LangGraph executes the workflow. This modular design makes the system flexible and scalable – new agents can be added later, and existing ones refined, without overhauling the entire system.
+
+## System Components & Agents Overview
+
+Our AI system comprises an o3 orchestrator and four specialized domain agents. Below is a summary of each component and its purpose:
+
+- **o3 Orchestrator Agent:** The orchestrator is the central **coordination agent**. It interprets the user's request and generates a JSON specification that defines which agents should be activated and their specific directives. It uses Fast MCP tools to access data and generate orchestration plans. The orchestrator provides the glue, ensuring agents work in concert through structured JSON specifications.
+
+- **Operations Summary Agent:** Focused on **operations and performance metrics**, this agent provides summaries of operational data. It might report on project deployments, product performance, service uptime, and other operational KPIs. The Operations agent ensures leaders can quickly grasp what's happening in the field and internal operations, highlighting any issues or successes. (Detailed PRD in _"Operations Summary Agent – PRD"_ below.)
+
+- **Upsell Discovery Agent:** This agent identifies **upsell and cross-sell opportunities** among existing customers. By analyzing customer accounts, product usage, and support data, it discovers where additional sales (upgrades, add-ons, service contracts, etc.) are likely. It helps the sales team prioritize outreach by answering questions like "Which clients have high potential for an upsell this quarter?". (See _"Upsell Discovery Agent – PRD"_ for details.)
+
+- **Campaign Planner Agent:** A marketing-focused agent that assists in **planning outreach campaigns**. It can draft campaign ideas targeting specific customer segments or lead types, propose messaging strategies, and even calendarize campaign schedules. The agent uses lead funnel data and marketing performance metrics to recommend effective campaign tactics to engage prospects or re-engage dormant leads. (See _"Campaign Planner Agent – PRD"_ for more.)
+
+- **Financial Impact Agent:** The finance-oriented agent that analyzes the **financial implications** of various scenarios. It answers questions like "What happens to our cash flow if we increase sales by 10%?" or "How would a 5% increase in COGS affect net income?". By pulling data from financial statements and running projections, it provides quick what-if analysis, ROI estimations, and financial summaries for strategic decisions. (Detailed in _"Financial Impact Agent – PRD"_ below.)
+
+Each agent operates semi-autonomously with access to relevant data and tools (via Fast MCP) for its domain. The o3 orchestrator provides the glue, ensuring they work in concert through structured JSON specifications. This architecture allows a _single conversation_ to seamlessly tap into multiple expert capabilities as needed.
+
+## Orchestration System Architecture
+
+### JSON Orchestration Specification
+
+The system uses a structured JSON format to define agent workflows:
+
+```json
+{
+  "orchestration_id": "uuid-string",
+  "timestamp": "2025-01-15T10:00:00Z",
+  "user_query": "Analyze Q2 2025 performance and plan Q3 2025 growth strategy",
+  "workflow": {
+    "agents": [
+      {
+        "agent_id": "operations_summary_agent",
+        "activation_trigger": "always",
+        "directives": [
+          "Generate Q2 2025 operations summary",
+          "Identify critical operational issues",
+          "Provide regional performance breakdown"
+        ],
+        "data_sources": ["installed_assets", "lead_funnel"],
+        "output_format": "json",
+        "dependencies": []
+      },
+      {
+        "agent_id": "upsell_discovery_agent", 
+        "activation_trigger": "after_operations_summary",
+        "directives": [
+          "Find top upsell opportunities in EMEA region",
+          "Prioritize by potential value",
+          "Include customer context and justification"
+        ],
+        "data_sources": ["installed_assets", "products"],
+        "output_format": "json",
+        "dependencies": ["operations_summary_agent"]
+      },
+      {
+        "agent_id": "campaign_planner_agent",
+        "activation_trigger": "after_upsell_discovery",
+        "directives": [
+          "Plan upsell campaign for EMEA opportunities",
+          "Create 4-week timeline",
+          "Suggest content and channels"
+        ],
+        "data_sources": ["lead_funnel", "products"],
+        "output_format": "json",
+        "dependencies": ["upsell_discovery_agent"]
+      },
+      {
+        "agent_id": "financial_impact_agent",
+        "activation_trigger": "after_campaign_plan",
+        "directives": [
+          "Project financial impact of EMEA upsell campaign",
+          "Calculate ROI scenarios",
+          "Provide quarterly forecasts"
+        ],
+        "data_sources": ["income_statement", "balance_sheet", "cash_flow"],
+        "output_format": "json",
+        "dependencies": ["campaign_planner_agent"]
+      }
+    ],
+    "execution_order": [
+      "operations_summary_agent",
+      "upsell_discovery_agent", 
+      "campaign_planner_agent",
+      "financial_impact_agent"
+    ],
+    "final_synthesis": {
+      "agent_id": "synthesis_agent",
+      "directives": [
+        "Combine all agent outputs into executive summary",
+        "Provide actionable recommendations",
+        "Format for presentation"
+      ]
+    }
+  }
+}
+```
+
+### Fast MCP Tools Integration
+
+The system leverages Fast MCP for rapid tool development:
+
+```python
+# Fast MCP Tool Examples
+from fast_mcp import FastMCPTool, DataConnector
+
+class CSVDataConnector(DataConnector):
+    def __init__(self, csv_path: str):
+        self.csv_path = csv_path
+        self.data = pd.read_csv(csv_path)
+    
+    def query(self, query: str) -> dict:
+        # Fast MCP provides built-in query parsing
+        return self.data.query(query).to_dict()
+
+class FinancialDataTool(FastMCPTool):
+    name = "financial_data"
+    description = "Query financial data from CSV files"
+    
+    def __init__(self):
+        self.income_statement = CSVDataConnector("income_statement.csv")
+        self.balance_sheet = CSVDataConnector("balance_sheet.csv")
+        self.cash_flow = CSVDataConnector("cash_flow.csv")
+    
+    async def query_financials(self, statement_type: str, period: str) -> dict:
+        connector = getattr(self, statement_type)
+        return connector.query(f"period == '{period}'")
+
+class ClaudeCodeTool(FastMCPTool):
+    name = "claude_code"
+    description = "Kick off Claude Code instances for data analysis"
+    
+    async def launch_claude_code(self, analysis_type: str, data_source: str) -> dict:
+        # Fast MCP handles the MCP server communication
+        return await self.mcp_client.call_claude_code(analysis_type, data_source)
+```
+
+### User Flow
+
+1. **User Input**: User talks to o3 with a natural language query
+2. **o3 Analysis**: o3 analyzes the query and generates JSON orchestration specification
+3. **JSON Storage**: The specification is saved to the project folder
+4. **LangGraph Execution**: LangGraph reads the JSON and executes the workflow
+5. **Agent Activation**: Each agent is activated according to the specification
+6. **Data Processing**: Agents use Fast MCP tools to access CSV data
+7. **Output Generation**: Each agent produces structured JSON output
+8. **Final Synthesis**: Results are combined into comprehensive report
+
+## Links to Detailed Agent PRDs
+
+For a deep dive into each specialized agent's product requirements – including their background, user personas, features, and success criteria – refer to the individual PRD documents below:
+
+- **Operations Summary Agent – PRD** (covers the agent that summarizes operational performance)
+- **Upsell Discovery Agent – PRD** (covers the agent that finds upsell opportunities)
+- **Campaign Planner Agent – PRD** (covers the agent that plans marketing campaigns)
+- **Financial Impact Agent – PRD** (covers the agent that analyzes financial scenarios)
+
+Each PRD elaborates on the agent's specific objectives, functionalities and how it delivers value to the users in that domain.
+
+<details> <summary>**Example Usage Scenario:** How the Agents Collaborate</summary>
+
+Imagine a **quarterly business review meeting** is coming up. An executive asks the AI assistant:
+
+"Give me a Q2 operations overview, highlight any major issues, and suggest ways to boost Q3 revenue."
+
+**System response workflow (behind the scenes):** 
+
+1. **o3 Orchestrator** interprets this multi-part request and generates a JSON specification that activates:
+   - Operations Summary Agent (for Q2 overview)
+   - Upsell Discovery Agent (for revenue opportunities)
+   - Campaign Planner Agent (for growth strategies)
+   - Financial Impact Agent (for projections)
+
+2. **LangGraph** executes the workflow according to the JSON specification, ensuring proper sequencing and data flow between agents.
+
+3. The **Operations Summary Agent** returns a summary: "_Q2 saw 15 new installations (5% above target) and 2 significant maintenance incidents causing 4 hours downtime. Customer satisfaction remained high (CSAT 4.6/5)._ …"
+
+4. Next, the **Upsell Discovery Agent** analyzes current customer data and returns: "_Upsell opportunities identified in Q3: Beta Corp (upgrade analytics module, est. $200K), Delta Industries (add service contract, est. $50K)_ …"
+
+5. The **Campaign Planner Agent** creates a targeted campaign plan for the identified opportunities.
+
+6. The **Financial Impact Agent** projects the ROI and financial impact of the proposed initiatives.
+
+7. Finally, the system **aggregates** these insights into one coherent answer for the user.
+
+**Final answer to user (example):**
+
+"_Q2 Operations Summary:_ _We achieved 15 new installations (5% above target) and maintained a high service uptime with only two minor incidents (total of 4 hours downtime). Customer satisfaction remained strong at 4.6/5._ _Opportunities to Boost Q3 Revenue:_ _Our analysis suggests focusing on upsells. For example, Beta Corp could benefit from an Analytics Module upgrade (estimated $0.2M in new revenue), and Delta Industries might opt for a service contract extension (worth ~$50K). Additionally, launching a targeted marketing campaign in EMEA, where we saw multiple lost deals in Q2, could revive dormant leads. By addressing these areas, we aim to improve Q3 revenue performance._"
+
+In this scenario, multiple agents contributed their expertise to form a comprehensive answer. The user did not have to query each aspect separately – the system intelligently combined the Operations, Upsell, and Campaign insights through structured orchestration. This exemplifies the power of our multi-agent approach in providing **360° decision support** in a single interaction. </details>

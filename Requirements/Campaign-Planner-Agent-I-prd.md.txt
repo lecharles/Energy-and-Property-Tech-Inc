@@ -1,0 +1,111 @@
+# Campaign Planner Agent – Product Requirements Document (PRD)
+
+## Background & Context
+
+The marketing team at Energy & Property Tech Inc. is responsible for generating leads and nurturing prospects through various channels (LinkedIn campaigns, email newsletters, webinars, etc.). They also collaborate with sales on campaigns targeting existing customers (for upsells or renewals). Planning a marketing campaign involves setting goals, choosing target segments, crafting messaging, scheduling content, and analyzing past campaign data to optimize strategy.
+
+Currently, planning can be a tedious process: - Marketers analyze **lead funnel** data to understand conversion rates and where prospects drop off. - They look at past campaign performance (open rates, response rates, etc.) to guess what might work. - They manually outline campaign plans in docs or spreadsheets, which can take many iterations. - Creative tasks (writing taglines or emails) also take time, often starting from scratch.
+
+**Opportunity:** The Campaign Planner Agent will serve as a creative and analytical assistant to marketers. It will help in quickly drafting campaign strategies, suggesting effective channels for a given audience, and even writing initial content outlines. By using the company's historical marketing data and best practices, it can produce campaign plans that are data-driven. This reduces the planning cycle time and injects AI-generated ideas to improve campaign effectiveness.
+
+## Objective / Job-to-be-Done
+
+The **Campaign Planner Agent** aims to streamline and enhance the marketing campaign design process. Its jobs include: - **Generate Campaign Plans:** Given a target goal or audience, outline a multi-step campaign. For example, if told _"We need to target mid-size manufacturing companies in EMEA for our new product launch,"_ the agent would propose a plan with channels (LinkedIn ads, webinar, email series), timing (a 8-week schedule with key touchpoints), and messaging themes. - **Recommend Channels & Tactics:** Based on what has worked historically (and general marketing knowledge), advise on which channels to use for a particular segment. E.g., _"Our data shows webinars have high conversion for C-suite audiences, so include a webinar."_ or _"LinkedIn has yielded 50 qualified leads/month in similar campaigns – invest more there."_ - **Content Ideation:** Provide ideas for campaign content – such as catchy email subject lines, ad copy suggestions, webinar titles. If the user asks for creative help, the agent can switch to idea mode. (It's not a full copywriter, but gives a solid starting point.) - **Budget and Timeline Suggestions:** If relevant, the agent can help allocate a budget across channels or set a timeline. E.g., _"Suggest spending 60% on digital ads, 30% on a virtual event, 10% on follow-up swag. Timeline: Start ads in Jan, webinar in Feb, follow-up in Mar."_ - **Integration with Sales Goals:** Ensure campaigns align with sales objectives. For instance, if Upsell Agent identified certain accounts, Campaign Planner could propose an account-based marketing approach for those accounts. Essentially, it should incorporate inputs like top targets or product focuses into the plan.
+
+In essence, the Campaign Planner Agent's job is being an **AI marketing strategist + copy assistant**, reducing the grunt work of planning and giving marketers a strong draft to refine.
+
+## User Persona(s)
+
+- **Marketing Manager / Campaign Strategist:** The primary user. Responsible for planning quarterly campaigns or one-off pushes. They use the agent to brainstorm and outline plans much faster.
+- **Content Marketer / Copywriter:** They may use the agent for fresh ideas on content or to get a first draft of an email or social post, which they can then polish. It's a collaborator for the creative aspect.
+- **Product Marketing Lead:** Launching a new product? They might ask the agent for a launch campaign plan or how to position the product to certain customer profiles.
+- **Sales Manager (Collaboration):** Sales might peek at campaign plans targeting their territories. A sales manager could query, _"What campaigns are planned for Q4 that will generate leads for APAC?"_ and the agent can summarize or even help coordinate co-marketing ideas. (This is secondary, mostly marketing would interact directly.)
+
+## Features and Functionality
+
+**1\. Campaign Strategy Drafting:** - The user can input a campaign goal or parameters (target audience, product, maybe budget constraints) and the agent will output a structured campaign plan. This might be presented with headings like **Goal**, **Target Audience**, **Key Message**, **Channels & Tactics**, **Timeline**. - The plan will be in prose but structured, often with bullet points or step-by-step phases. For example, under Channels it might bullet "- LinkedIn Ads: targeting \[persona\], running \[Jan-Feb\]" etc. - If the user provides minimal input (just "plan a campaign for Product X"), the agent will make reasonable assumptions (like target = existing segment that product is meant for).
+
+**2\. Historical Data Insights:** The agent leverages internal data like the **Lead Funnel** to tailor advice. For example, if conversion from lead to opportunity is particularly low at a certain funnel stage, the plan may highlight nurturing tactics at that stage. Or if prior email campaigns for similar products had low engagement, it might suggest trying a different approach (like more interactive content). - If connected to performance metrics (open rates by channel, cost per lead, etc.), the agent can mention expected ROI or known performance: _"Email typically yields a 5% response in this segment, so we plan to send ~1000 emails to get 50 responses…"_ (some of this may require data that might not be fully in our sample, but conceptually it's aimed to be data-backed).
+
+**3\. Content Generation (Lightweight):** For each suggested channel, the agent can generate a **sample content snippet**: - Subject lines for emails, ad tagline, social media post copy, etc. - These are meant as drafts. The user can specifically request, _"Give me a draft LinkedIn post for this campaign"_ and it should produce one, using the appropriate tone. - Creativity is key here; the agent should incorporate known best practices (like call-to-action words, brevity for ads, etc.).
+
+**4\. Calendar/Schedule Planning:** The agent can lay out a timeline (maybe even in a table form, e.g., Week 1 do X, Week 2 do Y, etc.). If asked _"Plan the schedule"_, it might output a table: | Week | Activity | |------|----------| | 1 | Launch teaser on social media (LinkedIn post announcing upcoming webinar) | | 2 | Send invitation emails to prospects for webinar… | and so on.
+
+**5\. Iteration and Refinement:** The user can iterate with the agent: - _"That budget is too high, adjust for $50k total."_ → agent revises plan accordingly (reducing some channels or scope). - _"Focus more on digital, less on events."_ → agent updates the plan to reflect that. - This interactive refinement is crucial so the marketer feels in control and the AI as a collaborative tool.
+
+**6\. Multi-Agent Collaboration (with Upsell Agent):** If provided a list of target accounts or segments (possibly from the Upsell Agent or sales input), the Campaign Planner can craft a specialized plan (account-based marketing). E.g., _"Here are 10 target accounts, plan a mini-campaign to engage them."_ The agent would then possibly lean on personalized tactics, showing it can adapt to different input types.
+
+**7\. Fast MCP Integration:** The agent leverages Fast MCP tools for seamless data access: - **OperationalDataTool:** Access lead funnel data, campaign performance metrics - **ClaudeCodeTool:** Kick off Claude Code instances for complex campaign analysis - **Real-time Data Access:** Connect to live marketing data sources via Fast MCP connectors
+
+**8\. Orchestration Integration:** The agent works within the o3 orchestration system: - **JSON Specification Compliance:** Follows directives from orchestration specifications - **Structured Output:** Produces standardized JSON responses for workflow integration - **Dependency Management:** Handles dependencies with other agents in the workflow
+
+## Technical Implementation
+
+### Fast MCP Integration
+```python
+from fast_mcp import FastMCPTool, DataConnector
+from langgraph.graph import StateGraph, END
+from typing import TypedDict, Annotated
+
+class CampaignPlannerAgent(BaseAgent):
+    def __init__(self, fast_mcp_client):
+        self.mcp_client = fast_mcp_client
+        self.operational_tool = OperationalDataTool()
+        self.claude_code_tool = ClaudeCodeTool()
+    
+    async def execute(self, directives: list, data_sources: list) -> dict:
+        # Use Fast MCP tools to access data
+        lead_funnel = await self.mcp_client.operational_data.get_lead_funnel_data()
+        products = await self.mcp_client.operational_data.get_products_data()
+        
+        # Process data according to directives
+        campaign_plan = self.plan_campaign(lead_funnel, products, directives)
+        
+        return self.format_output(campaign_plan)
+    
+    def plan_campaign(self, funnel_data: dict, products_data: dict, directives: list) -> dict:
+        # Implementation for planning campaigns
+        pass
+```
+
+### LangGraph Integration
+```python
+from langgraph.graph import StateGraph, END
+from typing import TypedDict, Annotated
+import operator
+
+# Worker state for campaign agent
+class CampaignWorkerState(TypedDict):
+    agent_id: str
+    directives: List[str]
+    data_sources: List[str]
+    agent_outputs: Annotated[dict, operator.add]
+
+def campaign_planner_agent(state: CampaignWorkerState):
+    """Campaign Planner Agent worker"""
+    
+    # Execute agent logic
+    agent = CampaignPlannerAgent(fast_mcp_client)
+    result = await agent.execute(state["directives"], state["data_sources"])
+    
+    return {"agent_outputs": {state["agent_id"]: result}}
+```
+
+### Orchestration Compliance
+The agent follows the JSON orchestration specification:
+- **Activation Trigger:** Responds to orchestration directives
+- **Data Sources:** Uses specified CSV files through Fast MCP connectors
+- **Output Format:** Produces structured JSON for workflow integration
+- **Dependencies:** Handles dependencies with other agents
+
+## Success Criteria / Metrics
+
+- **Time Saved in Planning:** The marketing team should complete campaign planning faster. If it used to take a week of meetings and drafting to finalize a plan, and with the agent it takes a day or two, that's a win. We can survey or measure planning cycle time.
+- **Quality of Campaigns (Leads/Conversion):** While many factors affect campaign success, we can track if campaigns devised with AI input perform _at least as well_ as or better than past campaigns. For instance, an increase in lead conversion by X% after adopting AI planning could suggest better targeting/messaging. This is a longer-term metric.
+- **Usage Frequency:** Are marketers actually using it for most campaigns? Ideally, every significant campaign in H2 2025, for example, had an AI-drafted plan as a starting point. If they only use it occasionally, we need to improve it. A target could be, say, 80% of new campaign briefs start from the agent's output.
+- **User Satisfaction & Trust:** Collect feedback. Do marketers feel the plans are sensible and creative? A satisfaction metric: e.g., _"Rate the usefulness of the draft plan"_ and aim for >4/5. Or anecdotal: _"The agent gave us a great idea to try a new channel we hadn't before."_
+- **Diversity of Ideas:** Ensure the agent isn't giving the same generic plan each time. We can look at variation in outputs. If it always suggests "do LinkedIn and email," it's too static. We want dynamic ideas fitting each scenario. So success is when the agent's suggestions are varied and tailored, reflecting the input parameters.
+- **Accuracy of Data Usage:** If the agent references data (like funnel metrics or past results) in its plan, those should be accurate. We'll verify that it pulls correct figures or reasonable averages. Misquoting data would hurt trust. So a metric could be number of data-reference errors (should be zero or minimal after testing).
+- **Orchestration Integration:** Successfully integrates with o3 orchestration system and produces valid JSON outputs for workflow integration. Target: 100% orchestration compliance.
+
+If the Campaign Planner Agent consistently produces useful, on-target campaign outlines that marketers can quickly turn into real campaigns – and those campaigns succeed – then the agent will have proven its value. It should feel like an "assistant with a marketing MBA," accelerating planning and injecting data-driven creativity into our marketing efforts through seamless Fast MCP integration and orchestration compliance.

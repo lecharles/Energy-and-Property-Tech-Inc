@@ -1,0 +1,109 @@
+# Upsell Discovery Agent – Product Requirements Document (PRD)
+
+## Background & Context
+
+Energy & Property Tech Inc., like many B2B companies, derives significant value from upselling and cross-selling to its existing customer base. The company's products range from hardware installations (like smart grid equipment) to software and services. Often, a customer who has one product might benefit from another – for instance, a client using our EnergyX Analytics Platform might also need our GreenVent Smart Ventilation systems, or a customer with installed hardware might need a service contract or upgrades.
+
+Currently, identifying these upsell opportunities is largely manual. Account managers periodically review their client list to spot who hasn't bought what, or they rely on gut feeling and customer hints. There might be data points scattered across CRM, support tickets, installed asset lists, and usage logs that could signal an upsell opportunity (e.g., a customer's usage is hitting a limit, suggesting they might upgrade to a higher tier).
+
+**Opportunity:** The Upsell Discovery Agent will systematically analyze customer data to surface high-probability upsell or cross-sell opportunities. It acts like a _virtual sales analyst_, scanning for patterns and suggesting which customers to target and what to offer them, thus potentially increasing revenue with much less manual analysis.
+
+## Objective / Job-to-be-Done
+
+The **Upsell Discovery Agent** is designed to answer the question: _"Where are our next best sales opportunities within our current customer base?"_ Its objectives include: - **Identify Top Upsell Candidates:** Find customers who are most likely to purchase additional products or upgrades. This could be based on criteria like: owning one product but not another related product, having high usage of a service (nearing capacity limits), not having a service contract (ripe to sell one), or having older versions of hardware (due for replacement). - **Estimate Upsell Value:** For each potential upsell identified, estimate the potential revenue or value. For example, _"Customer A could add Product X for an estimated $50k"_. This helps in prioritizing opportunities by size. - **Contextual Recommendations:** Provide reasoning or context for the upsell suggestion. E.g., _"Customer A has 50+ installed units of our Smart Sensor but no Analytics Platform – integrating the platform could enhance their operations. Additionally, they've expressed interest in data analytics in support calls."_ The agent should back its recommendations with data points when possible (like usage stats or account history). - **Assist in Action Planning:** Not only identify, but also help the sales team figure out next steps. For instance, the agent could be asked, _"How should we approach Customer A for the upsell?"_ and it might suggest a strategy or even draft a brief pitch (though actual messaging might be more the Campaign Planner's realm).
+
+In short, the job-to-be-done is enabling a proactive, data-driven approach to upselling – ensuring no low-hanging fruit is missed and making the sales teams more efficient in increasing account value.
+
+## User Persona(s)
+
+- **Account Manager / Sales Executive:** The primary user. They manage a portfolio of clients and would use the agent to uncover opportunities in their portfolio. For example, before a quarterly business review with a client, they might ask, _"What else can we offer this client that they don't have yet?"_
+- **Sales Manager / VP of Sales:** Interested in aggregate opportunities and ensuring the team targets the right accounts. This persona might ask, _"Give me the top 5 upsell opportunities this quarter across all clients in EMEA."_ They could also use it for strategy, like focusing the team on specific products to upsell.
+- **Customer Success Manager:** They ensure customers get value. They might use the agent to find beneficial add-ons for customers to increase their success (and thus increase our revenue). E.g., _"Which customers would benefit from training services or upgrades based on usage patterns?"_
+- **Marketing (Secondary):** The marketing team might leverage the identified upsell opportunities to craft targeted campaigns or collateral. They could ask, _"Which features or add-ons are most needed by current customers?"_ to maybe run a promotion.
+
+## Features and Functionality
+
+**1\. Customer Profile Analysis:** The agent can pull up a quick profile of a given customer's products and usage. If asked, _"What does Customer X currently have and use?"_, it will list their installations, subscriptions, last purchase date, contract status, etc. This sets the stage for identifying gaps.
+
+**2\. Upsell Opportunity List Generation:** - For a given **customer**, the agent generates a list of possible upsells: e.g., _"Customer X could consider \[Product A upgrade\], \[New Service B\], \[Additional units of Product C\]."_ Each suggestion includes a brief justification (why it's relevant) and an estimated value. - The agent can also generate a **global or filtered list**: e.g., _"What are the top upsell opportunities in the APAC region right now?"_ or _"Which 5 customers have the highest upsell potential overall?"_ It will scan all accounts and rank opportunities by potential value or likelihood. - This involves cross-referencing data like the **Installed Assets** (who has what), possibly usage data (not in the sample file, but we assume usage trends or support tickets could be indicators), and **Upsell Potential** values (the sample Installed Assets sheet even has an "Upsell Potential ($)" column, which the agent would definitely utilize).
+
+**3\. Prioritization and Scoring:** Each opportunity could have a score or category: - **High Likelihood / High Value:** e.g., customers where multiple indicators align (no overlapping product, plus a high usage or explicit interest). - **Medium / Low:** perhaps customers who could benefit but maybe smaller scale. The agent could tag opportunities as high/medium priority, helping users focus.
+
+**4\. Recommendation Narrative:** The agent doesn't just list data; it should provide the sales pitch context. For example: - _"Customer X is currently using our base plan extensively (at 85% capacity) – upselling them to the premium plan would give them more capacity and likely cost savings long-term. Estimated additional ARR: $20k."_ - This feature essentially means the agent synthesizes the why behind the data.
+
+**5\. Follow-up Actions Support:** If a user picks an opportunity and wants to act: - The agent can supply additional info like relevant contacts or history (if integrated with CRM data, e.g., _"Their last upgrade was 2 years ago; key sponsor is Jane Doe, CTO."_). - It might even integrate with the Campaign Planner or email drafting to kick-start outreach (though as mentioned, that's possibly a cross-agent scenario or future feature).
+
+**6\. Learning from Feedback:** (Future/ongoing improvement) Sales might mark which suggestions converted successfully or were not relevant. The agent could adapt its internal rules from this feedback, improving suggestions over time (this implies a feedback loop in the system design, but at PRD level we note it as a vision for continuous improvement).
+
+**7\. Fast MCP Integration:** The agent leverages Fast MCP tools for seamless data access: - **OperationalDataTool:** Access installed assets, customer data, and product information - **ClaudeCodeTool:** Kick off Claude Code instances for complex customer analysis - **Real-time Data Access:** Connect to live customer data sources via Fast MCP connectors
+
+**8\. Orchestration Integration:** The agent works within the o3 orchestration system: - **JSON Specification Compliance:** Follows directives from orchestration specifications - **Structured Output:** Produces standardized JSON responses for workflow integration - **Dependency Management:** Handles dependencies with other agents in the workflow
+
+## Technical Implementation
+
+### Fast MCP Integration
+```python
+from fast_mcp import FastMCPTool, DataConnector
+
+class UpsellDiscoveryAgent(BaseAgent):
+    def __init__(self, fast_mcp_client):
+        self.mcp_client = fast_mcp_client
+        self.operational_tool = OperationalDataTool()
+        self.claude_code_tool = ClaudeCodeTool()
+    
+    async def execute(self, directives: list, data_sources: list) -> dict:
+        # Use Fast MCP tools to access data
+        installed_assets = await self.mcp_client.operational_data.get_upsell_opportunities()
+        products = await self.mcp_client.operational_data.get_products_data()
+        
+        # Process data according to directives
+        opportunities = self.discover_upsell_opportunities(installed_assets, products)
+        
+        return self.format_output(opportunities)
+    
+    def discover_upsell_opportunities(self, assets_data: dict, products_data: dict) -> list:
+        # Implementation for discovering upsell opportunities
+        pass
+```
+
+### LangGraph Integration
+```python
+from langgraph.graph import StateGraph, END
+from typing import TypedDict, Annotated
+import operator
+
+# Worker state for upsell agent
+class UpsellWorkerState(TypedDict):
+    agent_id: str
+    directives: List[str]
+    data_sources: List[str]
+    agent_outputs: Annotated[dict, operator.add]
+
+def upsell_discovery_agent(state: UpsellWorkerState):
+    """Upsell Discovery Agent worker"""
+    
+    # Execute agent logic
+    agent = UpsellDiscoveryAgent(fast_mcp_client)
+    result = await agent.execute(state["directives"], state["data_sources"])
+    
+    return {"agent_outputs": {state["agent_id"]: result}}
+```
+
+### Orchestration Compliance
+The agent follows the JSON orchestration specification:
+- **Activation Trigger:** Responds to orchestration directives
+- **Data Sources:** Uses specified CSV files through Fast MCP connectors
+- **Output Format:** Produces structured JSON for workflow integration
+- **Dependencies:** Handles dependencies with other agents
+
+## Success Criteria / Metrics
+
+- **Increase in Upsell Revenue:** The ultimate metric – how much additional revenue (ARR or quarterly sales) can be attributed to opportunities surfaced by the agent. For example, if within 6 months, $X of upsell deals closed that were initially identified by the agent, that's a direct measure of success. We might set a target like "Identify opportunities leading to a 10% increase in upsell revenue in year one."
+- **Engagement by Sales Team:** If the tool is useful, sales people will use it frequently. We can track usage stats: e.g., number of queries per week per sales rep, or how many distinct opportunities are pulled. A high adoption (say, each account manager uses it at least weekly) indicates value.
+- **Conversion Rate of Suggestions:** Out of the top N opportunities the agent suggests, how many turn into actual pipeline or deals? If the agent is accurate in spotting genuine opportunities, we'd expect a decent conversion (with the human saleswork following through). We could measure that maybe 30% of "high priority" suggestions turn into a pursued sales lead.
+- **Sales Cycle Impact:** Possibly shorter cycles or better targeting. While harder to measure, if salespeople focus on warm opportunities given by the agent, the average time to close or the hit rate might improve. We can compare against historical benchmarks.
+- **Qualitative Feedback from Sales:** Do account managers feel it makes their job easier? We'll solicit anecdotes or survey responses. If reps say things like "The agent found an upsell I hadn't thought of for Client Y – that was great," that's a success sign.
+- **Coverage of Accounts:** We want to ensure no major account is overlooked. A metric could be that the agent evaluates 100% of top-tier existing customers for upsells each quarter. If it systematically covers ground that humans might miss, it's doing its job.
+- **Orchestration Integration:** Successfully integrates with o3 orchestration system and produces valid JSON outputs for workflow integration. Target: 100% orchestration compliance.
+
+By meeting these criteria, the Upsell Discovery Agent will prove its worth as a revenue-generating assistant, effectively acting as an AI-driven "insights engine" for our sales team to maximize customer value and satisfaction through seamless Fast MCP integration and orchestration compliance.

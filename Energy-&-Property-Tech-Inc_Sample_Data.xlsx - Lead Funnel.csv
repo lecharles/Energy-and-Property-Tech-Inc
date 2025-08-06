@@ -1,0 +1,26 @@
+Lead ID,Channel,Platform,Region,Product Interest,Stage,Status,Potential Value ($)
+L1000,LinkedIn,HubSpot,EMEA,PowerMax Smart Switchgear,Closed,Lost,220000
+L1001,Web Form,HubSpot,EMEA,PowerMax Smart Switchgear,Negotiation,Dormant,1424000
+L1002,Email Campaign,Salesforce,EMEA,SustainBuild Retrofits Service,Closed,Lost,287000
+L1003,Trade Show,HubSpot,AMER,DataShield DCIM Software,Closed,Won,185000
+L1004,Web Form,HubSpot,AMER,DataShield DCIM Software,Qualified,Active,260000
+L1005,Partner,Salesforce,EMEA,EdgeMax Micro Data Center,Negotiation,Dormant,1907000
+L1006,Trade Show,HubSpot,EMEA,EnergyX Analytics Platform,Qualified,Dormant,1601000
+L1007,Partner,Salesforce,EMEA,ChargePro EV Infrastructure,Proposal,Active,720000
+L1008,LinkedIn,Salesforce,AMER,DataShield DCIM Software,Proposal,Active,95000
+L1009,Trade Show,Salesforce,AMER,EdgeMax Micro Data Center,Proposal,Active,610000
+L1010,Web Form,HubSpot,AMER,EdgeMax Micro Data Center,Proposal,Active,340000
+L1011,Cold Call,Salesforce,EMEA,EcoGrid Microgrid Manager,Negotiation,Active,480000
+L1012,Cold Call,Salesforce,AMER,EnergyX Analytics Platform,Negotiation,Active,510000
+L1013,Partner,Salesforce,AMER,GreenVent Smart Ventilation,Qualified,Active,55000
+L1014,LinkedIn,HubSpot,AMER,CoolGuard Precision Cooling,Proposal,Active,430000
+L1015,Referral,Salesforce,EMEA,BuildingWise Management Suite,Qualified,Active,300000
+L1016,LinkedIn,HubSpot,AMER,ClimaSense HVAC Optimization,Qualified,Active,78000
+L1017,LinkedIn,HubSpot,AMER,GreenVent Smart Ventilation,Qualified,Active,62000
+L1018,Email Campaign,HubSpot,AMER,PowerSecure Modular UPS,Proposal,Active,510000
+L1019,Referral,Salesforce,EMEA,PowerSecure Modular UPS,Proposal,Active,440000
+L1020,Trade Show,HubSpot,AMER,ClimaSense HVAC Optimization,Negotiation,Active,730000
+L1021,Referral,Salesforce,AMER,EcoGrid Microgrid Manager,Proposal,Active,150000
+L1022,Partner,Salesforce,EMEA,BuildingWise Management Suite,Negotiation,Active,820000
+L1023,Trade Show,HubSpot,EMEA,ClimaSense HVAC Optimization,Proposal,Active,270000
+L1024,LinkedIn,HubSpot,AMER,EnergyX Analytics Platform,Qualified,Active,33000
