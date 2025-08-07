@@ -49,7 +49,7 @@ class CSVDataConnector:
             "rows": len(self.data),
             "columns": list(self.data.columns),
             "sample": self.data.head(3).to_dict('records'),
-            "data_types": self.data.dtypes.to_dict(),
+            "data_types": {col: str(dtype) for col, dtype in self.data.dtypes.to_dict().items()},
             "missing_values": self.data.isnull().sum().to_dict()
         }
     
