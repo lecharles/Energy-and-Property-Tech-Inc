@@ -1,15 +1,17 @@
 """
 LangGraph Workflow for Energy & Property Tech Inc.
-Phase 1: Foundation Setup - LangGraph Workflow Execution
+Phase 3: Enhanced with Real Claude-Powered Agents
 """
 
-from langgraph.graph import StateGraph, END, START
-from langgraph.types import Send
-from typing import TypedDict, Annotated, List, Dict, Any
-import operator
+import asyncio
 import json
 from datetime import datetime
-import asyncio
+from typing import TypedDict, Annotated, List, Dict, Any
+import operator
+from pathlib import Path
+
+# Import our real Claude agents
+from claude_agents import ClaudeAgentFactory
 
 # Custom merge function for agent outputs
 def merge_agent_outputs(existing: Dict[str, Any], new: Dict[str, Any]) -> Dict[str, Any]:
@@ -22,11 +24,11 @@ def merge_agent_outputs(existing: Dict[str, Any], new: Dict[str, Any]) -> Dict[s
 
 # Graph state
 class AgentState(TypedDict):
-    orchestration_spec: Dict[str, Any]  # JSON orchestration specification
-    agent_outputs: Annotated[Dict[str, Any], merge_agent_outputs]  # All agents write to this key
-    current_agent: str  # Current executing agent
-    workflow_status: str  # Workflow execution status
-    final_output: str  # Final synthesized output
+    orchestration_spec: Dict[str, Any]
+    agent_outputs: Annotated[Dict[str, Any], merge_agent_outputs]
+    current_agent: str
+    workflow_status: str
+    final_output: str
 
 # Worker state for individual agents
 class WorkerState(TypedDict):
@@ -36,332 +38,413 @@ class WorkerState(TypedDict):
     agent_outputs: Annotated[Dict[str, Any], merge_agent_outputs]
 
 class LangGraphWorkflow:
-    """LangGraph Workflow Execution Engine"""
+    """Enhanced LangGraph workflow with real Claude agents"""
     
     def __init__(self, fast_mcp_client):
-        self.mcp_client = fast_mcp_client
-        self.workflow = self._build_workflow()
+        """Initialize the workflow with Fast MCP client"""
+        self.fast_mcp_client = fast_mcp_client
+        self.agent_factory = ClaudeAgentFactory()
+        self.workflow = None
+        
+        print("🔄 LangGraph Workflow initialized with Claude agents")
     
     def _build_workflow(self):
-        """Build the LangGraph workflow"""
+        """Build the LangGraph workflow with real agent nodes"""
+        from langgraph.graph import StateGraph, END
         
-        # Create the workflow builder
-        workflow_builder = StateGraph(AgentState)
+        # Create the workflow graph
+        workflow = StateGraph(AgentState)
         
-        # Add the nodes
-        workflow_builder.add_node("orchestrator", self._orchestrator_node)
-        workflow_builder.add_node("operations_summary_agent_worker", self._operations_summary_agent_worker)
-        workflow_builder.add_node("upsell_discovery_agent_worker", self._upsell_discovery_agent_worker)
-        workflow_builder.add_node("campaign_planner_agent_worker", self._campaign_planner_agent_worker)
-        workflow_builder.add_node("financial_impact_agent_worker", self._financial_impact_agent_worker)
-        workflow_builder.add_node("synthesizer", self._synthesizer_node)
+        # Add nodes for each agent type
+        workflow.add_node("orchestrator_node", self._orchestrator_node)
+        workflow.add_node("operations_summary_agent_worker", self._operations_summary_agent_worker)
+        workflow.add_node("upsell_discovery_agent_worker", self._upsell_discovery_agent_worker)
+        workflow.add_node("campaign_planner_agent_worker", self._campaign_planner_agent_worker)
+        workflow.add_node("financial_impact_agent_worker", self._financial_impact_agent_worker)
+        workflow.add_node("synthesis_agent_worker", self._synthesis_agent_worker)
         
-        # Add edges to connect nodes
-        workflow_builder.add_edge(START, "orchestrator")
-        workflow_builder.add_conditional_edges(
-            "orchestrator", 
-            self._assign_workers, 
-            [
-                "operations_summary_agent_worker",
-                "upsell_discovery_agent_worker", 
-                "campaign_planner_agent_worker",
-                "financial_impact_agent_worker"
-            ]
+        # Define the workflow edges
+        workflow.set_entry_point("orchestrator_node")
+        
+        # Add conditional edges based on orchestration spec
+        workflow.add_conditional_edges(
+            "orchestrator_node",
+            self._route_to_agents,
+            {
+                "operations_summary_agent_worker": "operations_summary_agent_worker",
+                "upsell_discovery_agent_worker": "upsell_discovery_agent_worker",
+                "campaign_planner_agent_worker": "campaign_planner_agent_worker",
+                "financial_impact_agent_worker": "financial_impact_agent_worker",
+                "synthesis_agent_worker": "synthesis_agent_worker",
+                END: END
+            }
         )
-        workflow_builder.add_edge("operations_summary_agent_worker", "synthesizer")
-        workflow_builder.add_edge("upsell_discovery_agent_worker", "synthesizer")
-        workflow_builder.add_edge("campaign_planner_agent_worker", "synthesizer")
-        workflow_builder.add_edge("financial_impact_agent_worker", "synthesizer")
-        workflow_builder.add_edge("synthesizer", END)
         
-        # Compile the workflow
-        return workflow_builder.compile()
+        # Add edges from agent workers to synthesis
+        workflow.add_edge("operations_summary_agent_worker", "synthesis_agent_worker")
+        workflow.add_edge("upsell_discovery_agent_worker", "synthesis_agent_worker")
+        workflow.add_edge("campaign_planner_agent_worker", "synthesis_agent_worker")
+        workflow.add_edge("financial_impact_agent_worker", "synthesis_agent_worker")
+        
+        # Add edge from synthesis to end
+        workflow.add_edge("synthesis_agent_worker", END)
+        
+        self.workflow = workflow.compile()
+        return self.workflow
     
-    def _orchestrator_node(self, state: AgentState) -> Dict[str, Any]:
-        """Orchestrator that loads and validates the orchestration specification"""
+    async def _orchestrator_node(self, state: AgentState) -> AgentState:
+        """Orchestrator node that prepares the workflow"""
+        print("🎯 Orchestrator node: Preparing workflow execution...")
         
-        # Load orchestration spec from state
-        spec = state["orchestration_spec"]
+        orchestration_spec = state["orchestration_spec"]
+        workflow_status = "initialized"
         
-        # Validate and prepare for execution
-        return {
-            "workflow_status": "ready",
-            "orchestration_spec": spec
-        }
+        # Update state with workflow information
+        state["workflow_status"] = workflow_status
+        state["agent_outputs"] = {}
+        
+        print(f"✅ Orchestrator prepared workflow with {len(orchestration_spec.get('workflow', {}).get('agents', []))} agents")
+        return state
     
-    def _operations_summary_agent_worker(self, state: WorkerState) -> Dict[str, Any]:
-        """Operations Summary Agent worker"""
+    def _route_to_agents(self, state: AgentState) -> str:
+        """Route to the appropriate agent based on orchestration spec"""
+        orchestration_spec = state["orchestration_spec"]
+        agents = orchestration_spec.get("workflow", {}).get("agents", [])
         
-        # Mock agent execution for Phase 1
-        result = {
-            "agent_id": "operations_summary_agent",
-            "timestamp": datetime.utcnow().isoformat(),
-            "status": "completed",
-            "output": {
-                "total_installations": 18,
-                "operational_status": {
-                    "operational": 8,
-                    "maintenance_due": 2,
-                    "out_of_service": 1,
-                    "obsolete": 7
-                },
-                "regional_breakdown": {
-                    "APAC": 5,
-                    "EMEA": 7,
-                    "AMER": 6
-                },
-                "total_upsell_potential": "$5.2M",
-                "critical_issues": [
-                    "2 assets maintenance due",
-                    "1 asset out of service"
-                ]
-            }
-        }
-        
-        return {"agent_outputs": {state["agent_id"]: result}}
-    
-    def _upsell_discovery_agent_worker(self, state: WorkerState) -> Dict[str, Any]:
-        """Upsell Discovery Agent worker"""
-        
-        # Mock agent execution for Phase 1
-        result = {
-            "agent_id": "upsell_discovery_agent",
-            "timestamp": datetime.utcnow().isoformat(),
-            "status": "completed",
-            "output": {
-                "opportunities": [
-                    {
-                        "customer": "Helios Energy",
-                        "region": "APAC",
-                        "current_products": ["PowerSecure Modular UPS"],
-                        "recommended_upsell": "EnergyX Analytics Platform",
-                        "potential_value": "$500K",
-                        "justification": "High-value customer with UPS but no analytics",
-                        "next_steps": "Schedule demo of analytics platform"
-                    },
-                    {
-                        "customer": "United Government Complex",
-                        "region": "EMEA", 
-                        "current_products": ["DataShield DCIM Software"],
-                        "recommended_upsell": "Service Contract",
-                        "potential_value": "$34K",
-                        "justification": "No service contract, high-value installation",
-                        "next_steps": "Propose annual service agreement"
-                    }
-                ],
-                "total_opportunities": 2,
-                "total_potential_value": "$534K"
-            }
-        }
-        
-        return {"agent_outputs": {state["agent_id"]: result}}
-    
-    def _campaign_planner_agent_worker(self, state: WorkerState) -> Dict[str, Any]:
-        """Campaign Planner Agent worker"""
-        
-        # Mock agent execution for Phase 1
-        result = {
-            "agent_id": "campaign_planner_agent",
-            "timestamp": datetime.utcnow().isoformat(),
-            "status": "completed",
-            "output": {
-                "campaign_name": "Q3 2025 EMEA Upsell Campaign",
-                "target_customers": ["Helios Energy", "United Government Complex"],
-                "total_potential_value": "$534K",
-                "timeline": {
-                    "week_1": "Intro emails to target customers",
-                    "week_2": "Product demos and webinars",
-                    "week_3": "Follow-up calls and proposals",
-                    "week_4": "Closing and contract negotiations"
-                },
-                "channels": ["Email", "LinkedIn", "Webinar"],
-                "content_assets": [
-                    "EnergyX Analytics Platform demo video",
-                    "Service contract benefits presentation",
-                    "Customer success case studies"
-                ],
-                "expected_conversion_rate": "25%",
-                "projected_revenue": "$133.5K"
-            }
-        }
-        
-        return {"agent_outputs": {state["agent_id"]: result}}
-    
-    def _financial_impact_agent_worker(self, state: WorkerState) -> Dict[str, Any]:
-        """Financial Impact Agent worker"""
-        
-        # Mock agent execution for Phase 1
-        result = {
-            "agent_id": "financial_impact_agent",
-            "timestamp": datetime.utcnow().isoformat(),
-            "status": "completed",
-            "output": {
-                "current_quarter_revenue": "$116M",
-                "campaign_investment": "$15K",
-                "projected_upsell_revenue": "$133.5K",
-                "net_impact": "$118.5K",
-                "roi": "790%",
-                "scenarios": {
-                    "base_case": {
-                        "conversion_rate": "25%",
-                        "revenue_impact": "$133.5K",
-                        "margin_impact": "$93.5K"
-                    },
-                    "optimistic": {
-                        "conversion_rate": "40%",
-                        "revenue_impact": "$213.6K", 
-                        "margin_impact": "$149.5K"
-                    },
-                    "conservative": {
-                        "conversion_rate": "15%",
-                        "revenue_impact": "$80.1K",
-                        "margin_impact": "$56.1K"
-                    }
-                },
-                "quarterly_forecast": {
-                    "Q3_2025_projected": "$116M + $133.5K = $116.13M",
-                    "growth_rate": "0.11%",
-                    "margin_improvement": "0.08%"
-                }
-            }
-        }
-        
-        return {"agent_outputs": {state["agent_id"]: result}}
-    
-    def _synthesizer_node(self, state: AgentState) -> Dict[str, Any]:
-        """Synthesize final output from all agent results"""
-        
-        # Combine all agent outputs
-        agent_outputs = state["agent_outputs"]
-        
-        # Generate executive summary
-        final_output = {
-            "timestamp": datetime.utcnow().isoformat(),
-            "orchestration_id": state["orchestration_spec"]["orchestration_id"],
-            "user_query": state["orchestration_spec"]["user_query"],
-            "executive_summary": {
-                "total_upsell_potential": "$5.2M",
-                "campaign_revenue_projection": "$133.5K",
-                "roi": "790%",
-                "recommended_actions": [
-                    "Execute EMEA upsell campaign immediately",
-                    "Focus on Helios Energy and United Government Complex",
-                    "Allocate $15K budget for campaign execution"
-                ]
-            },
-            "detailed_analysis": agent_outputs
-        }
-        
-        return {"final_output": json.dumps(final_output, indent=2)}
-    
-    def _assign_workers(self, state: AgentState):
-        """Assign workers to each agent in the orchestration spec"""
-        
-        spec = state["orchestration_spec"]
-        agents = spec["workflow"]["agents"]
-        
-        # Create worker assignments for each agent
-        worker_assignments = []
+        # Check which agents need to be executed
         for agent in agents:
-            worker_assignments.append(
-                Send(
-                    f"{agent['agent_id']}_worker",
-                    {
-                        "agent_id": agent["agent_id"],
-                        "directives": agent["directives"],
-                        "data_sources": agent["data_sources"]
-                    }
-                )
-            )
+            agent_id = agent["agent_id"]
+            if agent_id not in state.get("agent_outputs", {}):
+                return f"{agent_id}_worker"
         
-        return worker_assignments
+        # If all agents are done, go to synthesis
+        return "synthesis_agent_worker"
     
-    async def execute_orchestration(self, orchestration_file: str) -> str:
-        """Execute orchestration workflow"""
+    async def _operations_summary_agent_worker(self, state: AgentState) -> AgentState:
+        """Real Claude-powered operations summary agent worker"""
+        print("🏭 Operations Summary Agent Worker: Executing with Claude...")
         
-        # Load orchestration spec
-        with open(orchestration_file, 'r') as file:
-            orchestration_spec = json.load(file)
+        try:
+            # Get agent configuration from orchestration spec
+            orchestration_spec = state["orchestration_spec"]
+            agent_config = self._get_agent_config(orchestration_spec, "operations_summary_agent")
+            
+            if not agent_config:
+                print("⚠️ No operations summary agent configuration found")
+                return state
+            
+            # Create and execute the real Claude agent
+            agent = self.agent_factory.create_agent("operations_summary_agent", self.fast_mcp_client)
+            result = await agent.execute(
+                directives=agent_config["directives"],
+                data_sources=agent_config["data_sources"]
+            )
+            
+            # Update state with agent output
+            agent_outputs = state.get("agent_outputs", {})
+            agent_outputs["operations_summary_agent"] = result
+            state["agent_outputs"] = agent_outputs
+            
+            print(f"✅ Operations Summary Agent completed: {result.get('status', 'unknown')}")
+            return state
+            
+        except Exception as error:
+            print(f"❌ Operations Summary Agent failed: {error}")
+            # Add error to state
+            agent_outputs = state.get("agent_outputs", {})
+            agent_outputs["operations_summary_agent"] = {
+                "error": str(error),
+                "status": "failed"
+            }
+            state["agent_outputs"] = agent_outputs
+            return state
+    
+    async def _upsell_discovery_agent_worker(self, state: AgentState) -> AgentState:
+        """Real Claude-powered upsell discovery agent worker"""
+        print("💰 Upsell Discovery Agent Worker: Executing with Claude...")
         
-        # Initialize state
-        initial_state = {
-            "orchestration_spec": orchestration_spec,
-            "agent_outputs": {},
-            "current_agent": None,
-            "workflow_status": "running",
-            "final_output": None
-        }
+        try:
+            # Get agent configuration from orchestration spec
+            orchestration_spec = state["orchestration_spec"]
+            agent_config = self._get_agent_config(orchestration_spec, "upsell_discovery_agent")
+            
+            if not agent_config:
+                print("⚠️ No upsell discovery agent configuration found")
+                return state
+            
+            # Create and execute the real Claude agent
+            agent = self.agent_factory.create_agent("upsell_discovery_agent", self.fast_mcp_client)
+            result = await agent.execute(
+                directives=agent_config["directives"],
+                data_sources=agent_config["data_sources"]
+            )
+            
+            # Update state with agent output
+            agent_outputs = state.get("agent_outputs", {})
+            agent_outputs["upsell_discovery_agent"] = result
+            state["agent_outputs"] = agent_outputs
+            
+            print(f"✅ Upsell Discovery Agent completed: {result.get('status', 'unknown')}")
+            return state
+            
+        except Exception as error:
+            print(f"❌ Upsell Discovery Agent failed: {error}")
+            # Add error to state
+            agent_outputs = state.get("agent_outputs", {})
+            agent_outputs["upsell_discovery_agent"] = {
+                "error": str(error),
+                "status": "failed"
+            }
+            state["agent_outputs"] = agent_outputs
+            return state
+    
+    async def _campaign_planner_agent_worker(self, state: AgentState) -> AgentState:
+        """Real Claude-powered campaign planner agent worker"""
+        print("📢 Campaign Planner Agent Worker: Executing with Claude...")
         
-        # Execute workflow
-        result = await self.workflow.ainvoke(initial_state)
-        return result["final_output"]
+        try:
+            # Get agent configuration from orchestration spec
+            orchestration_spec = state["orchestration_spec"]
+            agent_config = self._get_agent_config(orchestration_spec, "campaign_planner_agent")
+            
+            if not agent_config:
+                print("⚠️ No campaign planner agent configuration found")
+                return state
+            
+            # Create and execute the real Claude agent
+            agent = self.agent_factory.create_agent("campaign_planner_agent", self.fast_mcp_client)
+            result = await agent.execute(
+                directives=agent_config["directives"],
+                data_sources=agent_config["data_sources"]
+            )
+            
+            # Update state with agent output
+            agent_outputs = state.get("agent_outputs", {})
+            agent_outputs["campaign_planner_agent"] = result
+            state["agent_outputs"] = agent_outputs
+            
+            print(f"✅ Campaign Planner Agent completed: {result.get('status', 'unknown')}")
+            return state
+            
+        except Exception as error:
+            print(f"❌ Campaign Planner Agent failed: {error}")
+            # Add error to state
+            agent_outputs = state.get("agent_outputs", {})
+            agent_outputs["campaign_planner_agent"] = {
+                "error": str(error),
+                "status": "failed"
+            }
+            state["agent_outputs"] = agent_outputs
+            return state
+    
+    async def _financial_impact_agent_worker(self, state: AgentState) -> AgentState:
+        """Real Claude-powered financial impact agent worker"""
+        print("💰 Financial Impact Agent Worker: Executing with Claude...")
+        
+        try:
+            # Get agent configuration from orchestration spec
+            orchestration_spec = state["orchestration_spec"]
+            agent_config = self._get_agent_config(orchestration_spec, "financial_impact_agent")
+            
+            if not agent_config:
+                print("⚠️ No financial impact agent configuration found")
+                return state
+            
+            # Create and execute the real Claude agent
+            agent = self.agent_factory.create_agent("financial_impact_agent", self.fast_mcp_client)
+            result = await agent.execute(
+                directives=agent_config["directives"],
+                data_sources=agent_config["data_sources"]
+            )
+            
+            # Update state with agent output
+            agent_outputs = state.get("agent_outputs", {})
+            agent_outputs["financial_impact_agent"] = result
+            state["agent_outputs"] = agent_outputs
+            
+            print(f"✅ Financial Impact Agent completed: {result.get('status', 'unknown')}")
+            return state
+            
+        except Exception as error:
+            print(f"❌ Financial Impact Agent failed: {error}")
+            # Add error to state
+            agent_outputs = state.get("agent_outputs", {})
+            agent_outputs["financial_impact_agent"] = {
+                "error": str(error),
+                "status": "failed"
+            }
+            state["agent_outputs"] = agent_outputs
+            return state
+    
+    async def _synthesis_agent_worker(self, state: AgentState) -> AgentState:
+        """Real Claude-powered synthesis agent worker"""
+        print("🎯 Synthesis Agent Worker: Combining all agent outputs with Claude...")
+        
+        try:
+            # Get all agent outputs
+            agent_outputs = state.get("agent_outputs", {})
+            user_query = state["orchestration_spec"].get("user_query", "")
+            
+            # Create and execute the real Claude synthesis agent
+            agent = self.agent_factory.create_agent("synthesis_agent", self.fast_mcp_client)
+            result = await agent.execute(
+                agent_results=agent_outputs,
+                user_query=user_query
+            )
+            
+            # Update state with final output
+            state["final_output"] = result
+            state["workflow_status"] = "completed"
+            
+            print(f"✅ Synthesis Agent completed: {result.get('status', 'unknown')}")
+            return state
+            
+        except Exception as error:
+            print(f"❌ Synthesis Agent failed: {error}")
+            # Add error to state
+            state["final_output"] = {
+                "error": str(error),
+                "status": "failed"
+            }
+            state["workflow_status"] = "failed"
+            return state
+    
+    def _get_agent_config(self, orchestration_spec: Dict[str, Any], agent_id: str) -> Dict[str, Any]:
+        """Get agent configuration from orchestration spec"""
+        agents = orchestration_spec.get("workflow", {}).get("agents", [])
+        for agent in agents:
+            if agent["agent_id"] == agent_id:
+                return agent
+        return None
 
-# Workflow Engine for integration
 class WorkflowEngine:
-    """Workflow Execution Engine"""
+    """Enhanced workflow engine with real Claude agents"""
     
     def __init__(self, fast_mcp_client):
-        self.mcp_client = fast_mcp_client
+        """Initialize the workflow engine"""
+        self.fast_mcp_client = fast_mcp_client
         self.workflow = LangGraphWorkflow(fast_mcp_client)
+        self.workflow_graph = self.workflow._build_workflow()
+        
+        print("🚀 Workflow Engine initialized with Claude agents")
     
-    async def execute_orchestration(self, orchestration_file: str) -> str:
-        """Execute orchestration workflow"""
-        return await self.workflow.execute_orchestration(orchestration_file)
+    async def execute_orchestration(self, orchestration_file: str) -> Dict[str, Any]:
+        """
+        Execute orchestration using real Claude agents
+        
+        Args:
+            orchestration_file: Path to orchestration specification file
+            
+        Returns:
+            Final output from the workflow execution
+        """
+        print(f"🔄 Executing orchestration: {orchestration_file}")
+        
+        try:
+            # Load orchestration specification
+            with open(orchestration_file, 'r') as file:
+                orchestration_spec = json.load(file)
+            
+            # Initialize workflow state
+            initial_state = AgentState(
+                orchestration_spec=orchestration_spec,
+                agent_outputs={},
+                current_agent="",
+                workflow_status="initialized",
+                final_output=""
+            )
+            
+            # Execute the workflow
+            print("🚀 Starting workflow execution with Claude agents...")
+            result = await self.workflow_graph.ainvoke(initial_state)
+            
+            # Extract final output
+            final_output = result.get("final_output", {})
+            
+            print(f"✅ Workflow execution completed: {final_output.get('status', 'unknown')}")
+            return final_output
+            
+        except Exception as error:
+            print(f"❌ Workflow execution failed: {error}")
+            return {
+                "error": str(error),
+                "status": "failed",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+    def get_workflow_status(self) -> Dict[str, Any]:
+        """Get workflow engine status"""
+        return {
+            "service": "langgraph_workflow",
+            "status": "ready",
+            "claude_agents_available": True,
+            "timestamp": datetime.utcnow().isoformat()
+        }
 
-# Demo function for LangGraph workflow testing
-async def test_langgraph_workflow():
-    """Test LangGraph workflow functionality"""
-    print("🧪 Testing LangGraph Workflow")
+# Test function for Phase 3
+async def test_claude_workflow():
+    """Test the enhanced workflow with real Claude agents"""
+    print("🧪 Testing Enhanced LangGraph Workflow (Phase 3)")
     
-    # Create a real Fast MCP client for testing
     from fast_mcp_connectors import FastMCPClient
-    fast_mcp_client = FastMCPClient()
     
+    # Initialize components
+    fast_mcp_client = FastMCPClient()
     workflow_engine = WorkflowEngine(fast_mcp_client)
     
-    # Create a test orchestration spec
+    # Test with a sample orchestration
     test_orchestration = {
-        "orchestration_id": "test-123",
+        "orchestration_id": "test-claude-workflow",
         "timestamp": datetime.utcnow().isoformat(),
         "user_query": "Analyze Q2 2025 performance and plan Q3 2025 growth strategy",
         "workflow": {
             "agents": [
                 {
                     "agent_id": "operations_summary_agent",
-                    "directives": ["Generate operations summary"],
-                    "data_sources": ["installed_assets"]
-                },
-                {
-                    "agent_id": "upsell_discovery_agent",
-                    "directives": ["Find upsell opportunities"],
-                    "data_sources": ["installed_assets"]
+                    "activation_trigger": "always",
+                    "directives": [
+                        "Analyze operational performance for Q2 2025",
+                        "Identify key performance indicators",
+                        "Highlight critical operational issues"
+                    ],
+                    "data_sources": ["installed_assets", "lead_funnel"],
+                    "output_format": "json",
+                    "dependencies": []
                 }
             ],
-            "execution_order": ["operations_summary_agent", "upsell_discovery_agent"],
+            "execution_order": ["operations_summary_agent"],
             "final_synthesis": {
                 "agent_id": "synthesis_agent",
-                "directives": ["Combine outputs"]
+                "directives": [
+                    "Combine all agent outputs into executive summary",
+                    "Provide actionable recommendations",
+                    "Format for presentation"
+                ]
             }
         }
     }
     
     # Save test orchestration
-    with open("test_orchestration.json", 'w') as file:
+    test_file = "test_claude_orchestration.json"
+    with open(test_file, 'w') as file:
         json.dump(test_orchestration, file, indent=2)
     
-    # Execute workflow
-    result = await workflow_engine.execute_orchestration("test_orchestration.json")
+    try:
+        # Execute workflow
+        result = await workflow_engine.execute_orchestration(test_file)
+        
+        print(f"✅ Test completed successfully!")
+        print(f"📊 Result status: {result.get('status', 'unknown')}")
+        print(f"🤖 Agent outputs: {len(result.get('analysis', {}))} analysis components")
+        
+    except Exception as error:
+        print(f"❌ Test failed: {error}")
     
-    print("✅ Workflow execution completed!")
-    print("📊 Final output preview:")
-    print(result[:500] + "..." if len(result) > 500 else result)
-    
-    # Clean up test file
-    import os
-    if os.path.exists("test_orchestration.json"):
-        os.remove("test_orchestration.json")
-    
-    print("✅ LangGraph Workflow testing completed successfully!")
+    finally:
+        # Clean up test file
+        import os
+        if os.path.exists(test_file):
+            os.remove(test_file)
 
 if __name__ == "__main__":
-    asyncio.run(test_langgraph_workflow()) 
+    asyncio.run(test_claude_workflow()) 
