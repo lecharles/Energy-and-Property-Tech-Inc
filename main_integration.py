@@ -7,6 +7,11 @@ import asyncio
 import json
 from datetime import datetime
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Import our Phase 1 components
 from fast_mcp_connectors import FastMCPClient
@@ -21,6 +26,16 @@ class EnergyPropertyAISystem:
         self.o3_orchestrator = O3Orchestrator(self.fast_mcp_client)
         self.workflow_engine = WorkflowEngine(self.fast_mcp_client)
         self.initialized = False
+        
+        # Load API keys from environment
+        self.openai_api_key = os.getenv('OPENAI_API_KEY')
+        self.anthropic_api_key = os.getenv('ANTHROPIC_API_KEY')
+        
+        # Validate API keys are loaded
+        if not self.openai_api_key or self.openai_api_key == 'your_openai_api_key_here':
+            print("⚠️ Warning: OPENAI_API_KEY not set or using placeholder value")
+        if not self.anthropic_api_key or self.anthropic_api_key == 'your_anthropic_api_key_here':
+            print("⚠️ Warning: ANTHROPIC_API_KEY not set or using placeholder value")
     
     async def initialize(self):
         """Initialize all system components"""
@@ -131,6 +146,10 @@ class EnergyPropertyAISystem:
                 "fast_mcp_client": "ready" if self.initialized else "not_initialized",
                 "o3_orchestrator": "ready" if self.initialized else "not_initialized",
                 "workflow_engine": "ready" if self.initialized else "not_initialized"
+            },
+            "api_keys": {
+                "openai_configured": bool(self.openai_api_key and self.openai_api_key != 'your_openai_api_key_here'),
+                "anthropic_configured": bool(self.anthropic_api_key and self.anthropic_api_key != 'your_anthropic_api_key_here')
             }
         }
         
