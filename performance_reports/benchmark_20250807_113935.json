@@ -1,0 +1,34 @@
+{
+  "total_queries": 4,
+  "successful_queries": 4,
+  "success_rate": 100.0,
+  "average_execution_time": 15.53277975320816,
+  "min_execution_time": 11.168263912200928,
+  "max_execution_time": 23.5800461769104,
+  "detailed_results": [
+    {
+      "query": "Analyze EMEA opportunities for pipeline uplift",
+      "execution_time": 15.000461101531982,
+      "status": "success",
+      "result_size": 1745
+    },
+    {
+      "query": "Provide financial performance analysis for Q2 2025",
+      "execution_time": 11.168263912200928,
+      "status": "success",
+      "result_size": 1749
+    },
+    {
+      "query": "Generate operations summary and asset status",
+      "execution_time": 12.382347822189331,
+      "status": "success",
+      "result_size": 1743
+    },
+    {
+      "query": "Create comprehensive business analysis with multiple agents",
+      "execution_time": 23.5800461769104,
+      "status": "success",
+      "result_size": 1758
+    }
+  ]
+}

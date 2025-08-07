@@ -1,0 +1,237 @@
+{
+  "summary": {
+    "total_tests": 15,
+    "passed_tests": 8,
+    "failed_tests": 3,
+    "error_tests": 4,
+    "success_rate": 53.333333333333336,
+    "average_execution_time": 17.08444334665934,
+    "min_execution_time": 10.817596912384033,
+    "max_execution_time": 37.7345290184021
+  },
+  "results_by_type": {
+    "end_to_end": {
+      "count": 4,
+      "passed": 0,
+      "failed": 0,
+      "errors": 4,
+      "success_rate": 0.0
+    },
+    "error_scenario": {
+      "count": 4,
+      "passed": 4,
+      "failed": 0,
+      "errors": 0,
+      "success_rate": 100.0
+    },
+    "load_test": {
+      "count": 3,
+      "passed": 3,
+      "failed": 0,
+      "errors": 0,
+      "success_rate": 100.0
+    },
+    "load_test_summary": {
+      "count": 1,
+      "passed": 1,
+      "failed": 0,
+      "errors": 0,
+      "success_rate": 100.0
+    },
+    "agent_interaction": {
+      "count": 3,
+      "passed": 0,
+      "failed": 3,
+      "errors": 0,
+      "success_rate": 0.0
+    }
+  },
+  "detailed_results": [
+    {
+      "test_name": "End-to-End Test 1",
+      "test_type": "end_to_end",
+      "status": "error",
+      "execution_time": 15.546930074691772,
+      "error_message": "name 'orchechestration_file' is not defined",
+      "timestamp": "2025-08-07T15:35:27.974877+00:00"
+    },
+    {
+      "test_name": "End-to-End Test 2",
+      "test_type": "end_to_end",
+      "status": "error",
+      "execution_time": 11.548512935638428,
+      "error_message": "name 'orchechestration_file' is not defined",
+      "timestamp": "2025-08-07T15:35:39.523588+00:00"
+    },
+    {
+      "test_name": "End-to-End Test 3",
+      "test_type": "end_to_end",
+      "status": "error",
+      "execution_time": 11.910120964050293,
+      "error_message": "name 'orchechestration_file' is not defined",
+      "timestamp": "2025-08-07T15:35:51.433842+00:00"
+    },
+    {
+      "test_name": "End-to-End Test 4",
+      "test_type": "end_to_end",
+      "status": "error",
+      "execution_time": 17.892292022705078,
+      "error_message": "name 'orchechestration_file' is not defined",
+      "timestamp": "2025-08-07T15:36:09.326482+00:00"
+    },
+    {
+      "test_name": "Invalid Query Test",
+      "test_type": "error_scenario",
+      "status": "passed",
+      "execution_time": 14.530917167663574,
+      "error_message": null,
+      "timestamp": "2025-08-07T15:36:23.857720+00:00"
+    },
+    {
+      "test_name": "Malformed Query Test",
+      "test_type": "error_scenario",
+      "status": "passed",
+      "execution_time": 11.568809032440186,
+      "error_message": null,
+      "timestamp": "2025-08-07T15:36:35.426736+00:00"
+    },
+    {
+      "test_name": "Network Error Simulation",
+      "test_type": "error_scenario",
+      "status": "passed",
+      "execution_time": 14.749291896820068,
+      "error_message": null,
+      "timestamp": "2025-08-07T15:36:50.176293+00:00"
+    },
+    {
+      "test_name": "Timeout Error Simulation",
+      "test_type": "error_scenario",
+      "status": "passed",
+      "execution_time": 11.016674995422363,
+      "error_message": null,
+      "timestamp": "2025-08-07T15:37:01.193162+00:00"
+    },
+    {
+      "test_name": "Load Test Query 0",
+      "test_type": "load_test",
+      "status": "passed",
+      "execution_time": 37.733399629592896,
+      "error_message": null,
+      "timestamp": "2025-08-07T15:37:38.927952+00:00"
+    },
+    {
+      "test_name": "Load Test Query 1",
+      "test_type": "load_test",
+      "status": "passed",
+      "execution_time": 21.44564199447632,
+      "error_message": null,
+      "timestamp": "2025-08-07T15:37:38.927961+00:00"
+    },
+    {
+      "test_name": "Load Test Query 2",
+      "test_type": "load_test",
+      "status": "passed",
+      "execution_time": 10.817596912384033,
+      "error_message": null,
+      "timestamp": "2025-08-07T15:37:38.927965+00:00"
+    },
+    {
+      "test_name": "Load Test Summary",
+      "test_type": "load_test_summary",
+      "status": "passed",
+      "execution_time": 37.7345290184021,
+      "error_message": null,
+      "timestamp": "2025-08-07T15:37:38.928127+00:00"
+    },
+    {
+      "test_name": "Agent Dependency Test",
+      "test_type": "agent_interaction",
+      "status": "failed",
+      "execution_time": 11.764699220657349,
+      "error_message": "Missing expected agents: ['upsell_discovery_agent', 'campaign_planner_agent']",
+      "timestamp": "2025-08-07T15:37:50.693086+00:00"
+    },
+    {
+      "test_name": "Agent Communication Test",
+      "test_type": "agent_interaction",
+      "status": "failed",
+      "execution_time": 14.585201025009155,
+      "error_message": "Missing expected agents: ['financial_impact_agent']",
+      "timestamp": "2025-08-07T15:38:05.278486+00:00"
+    },
+    {
+      "test_name": "Multi-Agent Coordination Test",
+      "test_type": "agent_interaction",
+      "status": "failed",
+      "execution_time": 13.422033309936523,
+      "error_message": "Missing expected agents: ['upsell_discovery_agent', 'campaign_planner_agent', 'financial_impact_agent']",
+      "timestamp": "2025-08-07T15:38:18.700680+00:00"
+    }
+  ],
+  "performance_metrics": {
+    "overall_metrics": {
+      "total_executions": 0,
+      "successful_executions": 0,
+      "failed_executions": 0,
+      "total_execution_time": 0.0,
+      "average_execution_time": 0.0,
+      "total_errors": 0,
+      "total_retries": 0,
+      "success_rate": 0,
+      "error_rate": 0
+    },
+    "agent_performance": {},
+    "recent_errors": [],
+    "active_alerts": [],
+    "execution_trace": [],
+    "quality_thresholds": {
+      "min_output_length": 50,
+      "max_execution_time": 300,
+      "max_error_rate": 0.1,
+      "min_quality_score": 0.7
+    },
+    "alert_thresholds": {
+      "execution_time_threshold": 60,
+      "error_rate_threshold": 0.2,
+      "memory_usage_threshold": 0.8,
+      "cpu_usage_threshold": 0.9
+    },
+    "timestamp": "2025-08-07T15:38:18.700960+00:00"
+  },
+  "optimization_metrics": {
+    "cache_metrics": {
+      "hits": 0,
+      "misses": 0,
+      "evictions": 0,
+      "size": 0,
+      "hit_rate": 0,
+      "max_size": 1000
+    },
+    "execution_metrics": {
+      "total_executions": 0,
+      "average_execution_time": 0,
+      "average_memory_usage": 0,
+      "average_cpu_usage": 0,
+      "parallel_efficiency": 0.0
+    },
+    "resource_metrics": {
+      "current_memory_usage": 0.5,
+      "current_cpu_usage": 0.3,
+      "max_memory_usage": 0.8
+    },
+    "cost_metrics": {
+      "total_cost": 0.0,
+      "total_executions": 0,
+      "average_cost_per_execution": 0,
+      "total_tokens": 0,
+      "cost_per_token": 0.0001
+    },
+    "optimization_config": {
+      "cache_strategy": "lru",
+      "execution_mode": "hybrid",
+      "parallel_agents": 0
+    },
+    "timestamp": "2025-08-07T15:38:18.701015+00:00"
+  },
+  "timestamp": "2025-08-07T15:38:18.701090+00:00"
+}
