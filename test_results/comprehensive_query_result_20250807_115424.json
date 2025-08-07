@@ -1,0 +1,238 @@
+{
+  "query": "I need to know which region is the most interesting one to focus on with regards to gross margin. Can you look at where to focus on and which are the top three selling assets that I should focus on? Make sure that in that region and for those potential accounts, those assets are not yet sold, so there's truly an upsell opportunity. After you've done that, can you come up with an explanation as to why we should focus on that region, those products, those assets, and those accounts? From there, I'm going to have to come up with a communication strategy - which marketing campaign can we aspire for and what is the best channel of communication. And why?",
+  "orchestration_id": "553374b4-a5b4-47f9-b1fe-77b0153b8530",
+  "execution_time": 53.68108510971069,
+  "timestamp": "2025-08-07T15:54:24.631326+00:00",
+  "system_version": "Phase 4 v2.0",
+  "workflow_result": {
+    "orchestration_spec": {
+      "orchestration_id": "553374b4-a5b4-47f9-b1fe-77b0153b8530",
+      "timestamp": "2025-08-07T15:53:50.998004",
+      "user_query": "I need to know which region is the most interesting one to focus on with regards to gross margin. Can you look at where to focus on and which are the top three selling assets that I should focus on? Make sure that in that region and for those potential accounts, those assets are not yet sold, so there's truly an upsell opportunity. After you've done that, can you come up with an explanation as to why we should focus on that region, those products, those assets, and those accounts? From there, I'm going to have to come up with a communication strategy - which marketing campaign can we aspire for and what is the best channel of communication. And why?",
+      "workflow": {
+        "agents": [
+          {
+            "agent_id": "operations_summary_agent",
+            "activation_trigger": "always",
+            "directives": [
+              "Analyze gross margin by region and identify the top three selling assets.",
+              "Determine regions where these assets are not yet sold to identify upsell opportunities."
+            ],
+            "data_sources": [
+              "installed_assets",
+              "lead_funnel"
+            ],
+            "output_format": "json",
+            "dependencies": []
+          },
+          {
+            "agent_id": "campaign_planner_agent",
+            "activation_trigger": "after_upsell_discovery_agent",
+            "directives": [
+              "Develop a marketing campaign strategy focused on the identified region and assets.",
+              "Suggest the best communication channels to reach potential accounts."
+            ],
+            "data_sources": [
+              "products"
+            ],
+            "output_format": "json",
+            "dependencies": [
+              "upsell_discovery_agent"
+            ]
+          },
+          {
+            "agent_id": "upsell_discovery_agent",
+            "activation_trigger": "after_operations_summary_agent",
+            "directives": [
+              "Prioritize upsell opportunities in the identified region based on potential accounts.",
+              "Provide a summary of the potential accounts that have not yet purchased the top three assets."
+            ],
+            "data_sources": [
+              "lead_funnel",
+              "installed_assets"
+            ],
+            "output_format": "json",
+            "dependencies": [
+              "operations_summary_agent"
+            ]
+          }
+        ],
+        "execution_order": [
+          "operations_summary_agent",
+          "campaign_planner_agent",
+          "upsell_discovery_agent"
+        ],
+        "final_synthesis": {
+          "agent_id": "synthesis_agent",
+          "directives": [
+            "Combine all agent outputs into an executive summary.",
+            "Provide actionable recommendations based on the analysis.",
+            "Format the output for presentation to stakeholders."
+          ]
+        }
+      },
+      "ai_generated": true,
+      "analysis_summary": {
+        "query_type": "performance_analysis|upsell_opportunity|campaign_planning",
+        "business_domain": "sales|marketing",
+        "urgency_level": "high"
+      },
+      "validation": {
+        "is_valid": false,
+        "issues": [
+          "The timestamp is set in the future (2025-08-07), which is not valid for current analysis.",
+          "The query type in analysis_summary uses a pipe '|' instead of a comma ',' for separation.",
+          "The urgency_level is marked as 'high', but there is no context provided to justify the urgency."
+        ],
+        "suggestions": [
+          "Update the timestamp to a current or past date.",
+          "Change the query_type format to use commas for separation.",
+          "Provide context or justification for the urgency level in the analysis_summary."
+        ],
+        "confidence_score": 0.7
+      }
+    },
+    "agent_outputs": {},
+    "current_agent": "upsell_discovery_agent",
+    "workflow_status": "error",
+    "final_output": "",
+    "error_log": [
+      {
+        "timestamp": "2025-08-07T11:54:02.958760",
+        "component": "operations_summary_agent",
+        "error": "Invalid output from agent operations_summary_agent",
+        "type": "agent_error",
+        "recovery_attempted": false
+      },
+      {
+        "timestamp": "2025-08-07T11:54:16.175799",
+        "component": "campaign_planner_agent",
+        "error": "Invalid output from agent campaign_planner_agent",
+        "type": "agent_error",
+        "recovery_attempted": false
+      },
+      {
+        "timestamp": "2025-08-07T11:54:24.625119",
+        "component": "upsell_discovery_agent",
+        "error": "Invalid output from agent upsell_discovery_agent",
+        "type": "agent_error",
+        "recovery_attempted": false
+      },
+      {
+        "timestamp": "2025-08-07T11:54:24.629665",
+        "component": "synthesizer",
+        "error": "No agent outputs to synthesize",
+        "type": "synthesis_error"
+      }
+    ],
+    "performance_metrics": {
+      "total_execution_time": 30.191328048706055,
+      "total_agents_executed": 3,
+      "successful_agents": 0,
+      "success_rate": 0.0,
+      "agent_timings": {
+        "operations_summary_agent": {
+          "start_time": 1754582034.4361138,
+          "status": "failed",
+          "end_time": 1754582042.957027,
+          "duration": 8.520913124084473
+        },
+        "campaign_planner_agent": {
+          "start_time": 1754582042.96098,
+          "status": "failed",
+          "end_time": 1754582056.175638,
+          "duration": 13.21465802192688
+        },
+        "upsell_discovery_agent": {
+          "start_time": 1754582056.177901,
+          "status": "failed",
+          "end_time": 1754582064.624968,
+          "duration": 8.447067022323608
+        }
+      },
+      "error_counts": {
+        "operations_summary_agent": 1,
+        "campaign_planner_agent": 1,
+        "upsell_discovery_agent": 1
+      },
+      "average_agent_time": 10.060879389444986
+    },
+    "execution_trace": [
+      "Orchestrator started at 2025-08-07T11:53:54.433867",
+      "Agent operations_summary_agent started at 2025-08-07T11:53:54.436244",
+      "Agent operations_summary_agent failed at 2025-08-07T11:54:02.958797: Invalid output from agent operations_summary_agent",
+      "Agent campaign_planner_agent started at 2025-08-07T11:54:02.961039",
+      "Agent campaign_planner_agent failed at 2025-08-07T11:54:16.175807: Invalid output from agent campaign_planner_agent",
+      "Agent upsell_discovery_agent started at 2025-08-07T11:54:16.177954",
+      "Agent upsell_discovery_agent failed at 2025-08-07T11:54:24.625127: Invalid output from agent upsell_discovery_agent"
+    ],
+    "cache": {},
+    "parallel_execution": {}
+  },
+  "performance_metrics": {
+    "overall_metrics": {
+      "total_executions": 0,
+      "successful_executions": 0,
+      "failed_executions": 0,
+      "total_execution_time": 0.0,
+      "average_execution_time": 0.0,
+      "total_errors": 0,
+      "total_retries": 0,
+      "success_rate": 0,
+      "error_rate": 0
+    },
+    "agent_performance": {},
+    "recent_errors": [],
+    "active_alerts": [],
+    "execution_trace": [],
+    "quality_thresholds": {
+      "min_output_length": 50,
+      "max_execution_time": 300,
+      "max_error_rate": 0.1,
+      "min_quality_score": 0.7
+    },
+    "alert_thresholds": {
+      "execution_time_threshold": 60,
+      "error_rate_threshold": 0.2,
+      "memory_usage_threshold": 0.8,
+      "cpu_usage_threshold": 0.9
+    },
+    "timestamp": "2025-08-07T15:54:24.631262+00:00"
+  },
+  "optimization_metrics": {
+    "cache_metrics": {
+      "hits": 0,
+      "misses": 0,
+      "evictions": 0,
+      "size": 0,
+      "hit_rate": 0,
+      "max_size": 1000
+    },
+    "execution_metrics": {
+      "total_executions": 0,
+      "average_execution_time": 0,
+      "average_memory_usage": 0,
+      "average_cpu_usage": 0,
+      "parallel_efficiency": 0.0
+    },
+    "resource_metrics": {
+      "current_memory_usage": 0.5,
+      "current_cpu_usage": 0.3,
+      "max_memory_usage": 0.8
+    },
+    "cost_metrics": {
+      "total_cost": 0.0,
+      "total_executions": 0,
+      "average_cost_per_execution": 0,
+      "total_tokens": 0,
+      "cost_per_token": 0.0001
+    },
+    "optimization_config": {
+      "cache_strategy": "lru",
+      "execution_mode": "hybrid",
+      "parallel_agents": 2
+    },
+    "timestamp": "2025-08-07T15:54:24.631317+00:00"
+  },
+  "system_status": "completed"
+}

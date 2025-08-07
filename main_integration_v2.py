@@ -174,7 +174,7 @@ class EnergyPropertyAISystemV2:
             comprehensive_result = {
                 "query": user_query,
                 "orchestration_id": orchestration_id,
-                "execution_time": execution_time,
+                "execution_time": f"{execution_time:.2f} seconds",
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "system_version": "Phase 4 v2.0",
                 "workflow_result": result,
@@ -183,7 +183,7 @@ class EnergyPropertyAISystemV2:
                 "system_status": "completed"
             }
             
-            logger.info(f"✅ Query processing completed in {execution_time:.2f}s")
+            logger.info(f"✅ Query processing completed in {execution_time:.2f} seconds")
             
             return comprehensive_result
             
@@ -196,7 +196,7 @@ class EnergyPropertyAISystemV2:
             
             return {
                 "error": str(e),
-                "execution_time": execution_time,
+                "execution_time": f"{execution_time:.2f} seconds",
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "system_status": "error"
             }
@@ -352,7 +352,7 @@ async def run_phase4_demo():
     
     if "error" not in result:
         print("✅ Demo query processed successfully!")
-        print(f"📊 Execution time: {result['execution_time']:.2f}s")
+        print(f"📊 Execution time: {result['execution_time']}")
         print(f"🤖 Orchestration ID: {result['orchestration_id']}")
         
         # Show performance metrics

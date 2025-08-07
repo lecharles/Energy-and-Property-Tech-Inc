@@ -40,10 +40,23 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Dictionary merge function for agent_outputs
+def merge_agent_outputs(existing_outputs: dict, new_outputs: dict) -> dict:
+    """Merge new agent outputs with existing outputs"""
+    if not existing_outputs:
+        return new_outputs
+    if not new_outputs:
+        return existing_outputs
+    
+    merged = existing_outputs.copy()
+    merged.update(new_outputs)
+    return merged
+
 # Enhanced state management with comprehensive tracking
 class AdvancedAgentState(TypedDict):
     orchestration_spec: dict
-    agent_outputs: Annotated[dict, operator.add]
+    agent_outputs: Annotated[dict, merge_agent_outputs]
+    agent_configs: Dict[str, dict]
     current_agent: str
     workflow_status: str
     final_output: str
@@ -83,37 +96,89 @@ class PerformanceMonitor:
             
             self.agent_timings[agent_id].update({
                 'end_time': end_time,
-                'duration': duration,
+                'duration': f"{duration:.2f} seconds",
                 'status': 'completed' if success else 'failed'
             })
             
-            logger.info(f"✅ Agent {agent_id} completed in {duration:.2f}s")
+            logger.info(f"✅ Agent {agent_id} completed in {duration:.2f} seconds")
     
     def record_error(self, agent_id: str, error: Exception):
         """Record error for specific agent"""
         if agent_id not in self.error_counts:
             self.error_counts[agent_id] = 0
         self.error_counts[agent_id] += 1
+        
+        # Store detailed error information
+        if not hasattr(self, 'errors'):
+            self.errors = []
+        
+        self.errors.append({
+            'agent_id': agent_id,
+            'error': str(error),
+            'timestamp': time.time()
+        })
+        
         logger.error(f"❌ Error in agent {agent_id}: {str(error)}")
     
-    def get_performance_report(self) -> dict:
+    def get_performance_report(self) -> Dict[str, Any]:
         """Generate comprehensive performance report"""
         if not self.start_time:
-            return {}
+            return {"status": "No execution data available"}
         
-        total_duration = time.time() - self.start_time
+        end_time = time.time()
+        total_duration = end_time - self.start_time
+        
+        # Calculate success rate
         total_agents = len(self.agent_timings)
         successful_agents = sum(1 for timing in self.agent_timings.values() 
                               if timing.get('status') == 'completed')
+        success_rate = (successful_agents / total_agents * 100) if total_agents > 0 else 0
+        
+        # Calculate average agent time
+        agent_durations = [timing.get('duration', 0) for timing in self.agent_timings.values()]
+        if agent_durations and isinstance(agent_durations[0], str):
+            # Convert "X.XX seconds" to float
+            agent_durations = [float(duration.split()[0]) for duration in agent_durations if duration]
+        average_agent_time = sum(agent_durations) / len(agent_durations) if agent_durations else 0
+        
+        # Convert timestamps to readable format
+        from datetime import datetime
+        start_datetime = datetime.fromtimestamp(self.start_time).strftime("%Y-%m-%d %H:%M:%S")
+        end_datetime = datetime.fromtimestamp(end_time).strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Get errors list
+        errors = getattr(self, 'errors', [])
         
         return {
-            'total_execution_time': total_duration,
-            'total_agents_executed': total_agents,
-            'successful_agents': successful_agents,
-            'success_rate': (successful_agents / total_agents * 100) if total_agents > 0 else 0,
-            'agent_timings': self.agent_timings,
-            'error_counts': self.error_counts,
-            'average_agent_time': sum(timing.get('duration', 0) for timing in self.agent_timings.values()) / total_agents if total_agents > 0 else 0
+            "execution_summary": {
+                "start_time": start_datetime,
+                "end_time": end_datetime,
+                "total_execution_time": f"{total_duration:.2f} seconds",
+                "success_rate": f"{success_rate:.1f}%",
+                "total_agents_executed": f"{total_agents} agents"
+            },
+            "agent_performance": {
+                agent_id: {
+                    "duration": timing.get('duration', 'N/A'),
+                    "status": timing.get('status', 'unknown'),
+                    "start_time": datetime.fromtimestamp(timing.get('start_time', 0)).strftime("%Y-%m-%d %H:%M:%S") if timing.get('start_time') else 'N/A',
+                    "end_time": datetime.fromtimestamp(timing.get('end_time', 0)).strftime("%Y-%m-%d %H:%M:%S") if timing.get('end_time') else 'N/A'
+                }
+                for agent_id, timing in self.agent_timings.items()
+            },
+            "performance_metrics": {
+                "average_agent_time": f"{average_agent_time:.2f} seconds",
+                "total_errors": len(errors),
+                "error_rate": f"{(len(errors) / total_agents * 100) if total_agents > 0 else 0:.1f}%"
+            },
+            "errors": [
+                {
+                    "agent_id": error.get('agent_id', 'unknown'),
+                    "error_message": error.get('error', 'Unknown error'),
+                    "timestamp": datetime.fromtimestamp(error.get('timestamp', 0)).strftime("%Y-%m-%d %H:%M:%S") if error.get('timestamp') else 'N/A'
+                }
+                for error in errors
+            ]
         }
 
 # Error handling and recovery system
@@ -220,10 +285,25 @@ class EnhancedWorkflowNodes:
             if "parallel_execution" not in state:
                 state["parallel_execution"] = {}
             
-            logger.info(f"✅ Orchestrator prepared workflow with {len(spec['workflow']['agents'])} agents")
+            # Prepare agent configurations from orchestration spec
+            agent_configs = {}
+            agents = spec["workflow"]["agents"]
+            
+            for agent in agents:
+                agent_id = agent["agent_id"]
+                agent_configs[agent_id] = {
+                    "directives": agent.get("directives", []),
+                    "data_sources": agent.get("data_sources", []),
+                    "output_format": agent.get("output_format", "json"),
+                    "dependencies": agent.get("dependencies", [])
+                }
+            
+            logger.info(f"✅ Orchestrator prepared workflow with {len(agents)} agents")
+            logger.info(f"📋 Agent configs prepared: {list(agent_configs.keys())}")
             
             return {
                 **state,
+                "agent_configs": agent_configs,
                 "workflow_status": "ready",
                 "execution_trace": execution_trace,
                 "performance_metrics": self.performance_monitor.get_performance_report()
@@ -310,6 +390,42 @@ class EnhancedWorkflowNodes:
             
             return []
     
+    def route_to_next_agent(self, state: AdvancedAgentState) -> str:
+        """Route to the next agent in the execution order"""
+        logger.info("🔄 Route to next agent: Determining next step")
+        
+        try:
+            spec = state["orchestration_spec"]
+            execution_order = spec["workflow"]["execution_order"]
+            current_agent = state.get("current_agent", "")
+            
+            # Find the next agent in execution order
+            if not current_agent:
+                # Start with the first agent
+                next_agent = execution_order[0]
+                logger.info(f"🎯 Starting with first agent: {next_agent}")
+                return f"{next_agent}_worker"
+            
+            # Find current agent index
+            try:
+                current_index = execution_order.index(current_agent)
+                if current_index + 1 < len(execution_order):
+                    next_agent = execution_order[current_index + 1]
+                    logger.info(f"🎯 Moving to next agent: {next_agent}")
+                    return f"{next_agent}_worker"
+                else:
+                    # All agents completed, go to synthesizer
+                    logger.info("🎯 All agents completed, moving to synthesizer")
+                    return "enhanced_synthesizer"
+            except ValueError:
+                # Current agent not in execution order, go to synthesizer
+                logger.info("🎯 Current agent not in execution order, moving to synthesizer")
+                return "enhanced_synthesizer"
+                
+        except Exception as e:
+            logger.error(f"❌ Routing error: {str(e)}")
+            return "enhanced_synthesizer"
+    
     def create_agent_executor(self, agent_id: str):
         """Create generic agent executor with monitoring"""
         
@@ -329,13 +445,22 @@ class EnhancedWorkflowNodes:
                 directives = agent_config.get("directives", [])
                 data_sources = agent_config.get("data_sources", [])
                 
+                # Debug logging
+                logger.info(f"🔍 Agent {agent_id} config: {agent_config}")
+                logger.info(f"📋 Agent {agent_id} directives: {directives}")
+                logger.info(f"📊 Agent {agent_id} data sources: {data_sources}")
+                
                 # Create and execute agent
                 agent = self.agent_factory.create_agent(agent_id, self.fast_mcp_client)
                 result = await agent.execute(directives, data_sources)
                 
-                # Validate output
-                if not result or "output" not in result:
-                    raise ValueError(f"Invalid output from agent {agent_id}")
+                # Validate output - check for either "output" or "analysis" field
+                if not result or not isinstance(result, dict):
+                    raise ValueError(f"Invalid output from agent {agent_id}: result is not a dictionary")
+                
+                # Check for required fields in agent output
+                if "analysis" not in result and "output" not in result:
+                    raise ValueError(f"Invalid output from agent {agent_id}: missing 'analysis' or 'output' field")
                 
                 # Cache the result
                 cache_key = f"{agent_id}_{hash(json.dumps(directives))}"
@@ -504,7 +629,6 @@ class EnhancedWorkflowEngine:
         
         # Add nodes
         workflow_builder.add_node("enhanced_orchestrator", self.workflow_nodes.enhanced_orchestrator)
-        workflow_builder.add_node("dynamic_router", self.workflow_nodes.dynamic_agent_router)
         workflow_builder.add_node("enhanced_synthesizer", self.workflow_nodes.enhanced_synthesizer)
         
         # Add agent executor nodes for each agent type
@@ -522,22 +646,23 @@ class EnhancedWorkflowEngine:
                 self.workflow_nodes.create_agent_executor(agent_type)
             )
         
-        # Add edges
+        # Add edges - sequential execution
         workflow_builder.add_edge(START, "enhanced_orchestrator")
+        
+        # Connect orchestrator to first agent
         workflow_builder.add_conditional_edges(
             "enhanced_orchestrator",
-            lambda state: "dynamic_router",
-            ["dynamic_router"]
-        )
-        workflow_builder.add_conditional_edges(
-            "dynamic_router",
-            self.workflow_nodes.dynamic_agent_router,
-            [f"{agent_type}_worker" for agent_type in agent_types]
+            self.workflow_nodes.route_to_next_agent,
+            [f"{agent_type}_worker" for agent_type in agent_types] + ["enhanced_synthesizer"]
         )
         
-        # Connect all agent workers to synthesizer
+        # Connect each agent to the next or synthesizer
         for agent_type in agent_types:
-            workflow_builder.add_edge(f"{agent_type}_worker", "enhanced_synthesizer")
+            workflow_builder.add_conditional_edges(
+                f"{agent_type}_worker",
+                self.workflow_nodes.route_to_next_agent,
+                [f"{next_agent_type}_worker" for next_agent_type in agent_types] + ["enhanced_synthesizer"]
+            )
         
         workflow_builder.add_edge("enhanced_synthesizer", END)
         
@@ -560,6 +685,7 @@ class EnhancedWorkflowEngine:
             initial_state = AdvancedAgentState(
                 orchestration_spec=orchestration_spec,
                 agent_outputs={},
+                agent_configs={}, # Initialize agent_configs here
                 current_agent="",
                 workflow_status="initialized",
                 final_output="",

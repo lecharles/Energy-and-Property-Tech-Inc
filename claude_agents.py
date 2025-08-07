@@ -272,27 +272,72 @@ Please provide a comprehensive analysis including:
 6. Operational Efficiency Metrics
 7. Recommendations for Improvement
 
-Format your response as a JSON object with the following structure:
+CRITICAL REQUIREMENTS FOR ALL NUMERICAL VALUES:
+
+1. CURRENCY VALUES - Always include currency symbol:
+   - Revenue: "$15,000" or "€15,000"
+   - Costs: "$5,000" or "€5,000"
+   - Budget: "$50,000" or "€50,000"
+
+2. PERCENTAGES - Always include % symbol:
+   - Performance scores: "85%"
+   - Utilization rates: "75%"
+   - Efficiency metrics: "90%"
+
+3. COUNTS/QUANTITIES - Always specify what is being counted:
+   - Total Assets: "150 assets"
+   - Customer Count: "500 customers"
+   - Regional Count: "5 regions"
+
+4. TIME VALUES - Use readable format:
+   - Processing Time: "2.5 hours"
+   - Response Time: "45 minutes"
+   - Timeline: "2025-03-01 to 2025-12-31"
+
+5. ACRONYM DEFINITIONS - Always explain acronyms:
+   - KPI = Key Performance Indicator
+   - ROI = Return on Investment
+   - SLA = Service Level Agreement
+   - MTTR = Mean Time to Repair
+   - MTBF = Mean Time Between Failures
+
+6. SYSTEM METRICS - Include units:
+   - Memory Usage: "50%" (not 0.5)
+   - CPU Usage: "75%"
+   - Performance Score: "85%"
+
+7. DATES - Use current year (2025) and future dates:
+   - Analysis Date: "2025-08-07"
+   - Target Date: "2025-12-31"
+   - Milestone Date: "2025-06-15"
+
+FORMAT YOUR OUTPUT AS JSON WITH THESE REQUIREMENTS:
+- All monetary values must include currency symbol
+- All percentages must include % symbol
+- All counts must specify what is being counted
+- All acronyms must be defined in the output
+- All timestamps must be in readable datetime format
+- All system metrics must be in percentage format
+
+EXAMPLE FORMAT:
 {{
-    "operational_summary": {{
-        "total_assets": "number",
-        "operational_status": "string",
-        "performance_score": "number (0-100)",
-        "critical_issues": ["list of issues"],
-        "regional_breakdown": {{
-            "region": "performance_metrics"
-        }}
-    }},
-    "key_insights": [
-        "list of key insights"
-    ],
-    "recommendations": [
-        "list of actionable recommendations"
-    ],
-    "risk_assessment": {{
-        "risk_level": "low/medium/high",
-        "risk_factors": ["list of risk factors"]
+  "performance_summary": {{
+    "overall_score": "85%",
+    "total_revenue": "$15M",
+    "asset_utilization": "75%"
+  }},
+  "regional_breakdown": {{
+    "north_america": {{
+      "revenue": "$8M",
+      "performance": "90%",
+      "asset_count": "75 assets"
     }}
+  }},
+  "kpis": {{
+    "roi": "250% (Return on Investment)",
+    "efficiency": "85%",
+    "customer_satisfaction": "92%"
+  }}
 }}
 """
     
@@ -388,29 +433,67 @@ Please provide a comprehensive upsell analysis including:
 6. Regional Opportunity Analysis
 7. Implementation Recommendations
 
-Format your response as a JSON object with the following structure:
+CRITICAL REQUIREMENTS FOR ALL NUMERICAL VALUES:
+
+1. CURRENCY VALUES - Always include currency symbol:
+   - Revenue: "$15,000" or "€15,000"
+   - Potential Revenue: "$50,000" or "€50,000"
+   - Customer Value: "$25,000" or "€25,000"
+
+2. PERCENTAGES - Always include % symbol:
+   - Conversion rates: "15%"
+   - Confidence scores: "85%"
+   - Success rates: "75%"
+
+3. COUNTS/QUANTITIES - Always specify what is being counted:
+   - Total Opportunities: "12 opportunities"
+   - Customer Count: "150 customers"
+   - Product Count: "25 products"
+
+4. TIME VALUES - Use readable format:
+   - Implementation Time: "3 months"
+   - Sales Cycle: "45 days"
+   - Timeline: "2025-03-01 to 2025-12-31"
+
+5. ACRONYM DEFINITIONS - Always explain acronyms:
+   - LTV = Lifetime Value
+   - ARR = Annual Recurring Revenue
+   - MRR = Monthly Recurring Revenue
+   - CAC = Customer Acquisition Cost
+   - CLV = Customer Lifetime Value
+
+6. SYSTEM METRICS - Include units:
+   - Memory Usage: "50%" (not 0.5)
+   - CPU Usage: "75%"
+   - Performance Score: "85%"
+
+7. DATES - Use current year (2025) and future dates:
+   - Implementation Date: "2025-03-01"
+   - Target Date: "2025-12-31"
+   - Milestone Date: "2025-06-15"
+
+FORMAT YOUR OUTPUT AS JSON WITH THESE REQUIREMENTS:
+- All monetary values must include currency symbol
+- All percentages must include % symbol
+- All counts must specify what is being counted
+- All acronyms must be defined in the output
+- All timestamps must be in readable datetime format
+- All system metrics must be in percentage format
+
+EXAMPLE FORMAT:
 {{
-    "upsell_opportunities": [
-        {{
-            "customer_id": "string",
-            "customer_name": "string",
-            "current_products": ["list"],
-            "recommended_products": ["list"],
-            "potential_revenue": "number",
-            "confidence_score": "number (0-100)",
-            "implementation_priority": "high/medium/low"
-        }}
-    ],
-    "total_upsell_potential": "number",
-    "customer_segments": {{
-        "segment_name": "opportunity_metrics"
-    }},
-    "regional_analysis": {{
-        "region": "opportunity_summary"
-    }},
-    "recommendations": [
-        "list of actionable recommendations"
-    ]
+  "total_opportunities": "12 opportunities",
+  "potential_revenue": "$2.5M",
+  "confidence_score": "85%",
+  "implementation_timeline": "3 months",
+  "customer_segments": {{
+    "enterprise": "150 customers",
+    "mid_market": "75 customers"
+  }},
+  "revenue_breakdown": {{
+    "product_a": "$500,000",
+    "product_b": "$750,000"
+  }}
 }}
 """
     
@@ -504,48 +587,71 @@ Please create a comprehensive campaign plan including:
 6. Success Metrics and KPIs
 7. Risk Assessment and Mitigation
 
-Format your response as a JSON object with the following structure:
+CRITICAL REQUIREMENTS FOR ALL NUMERICAL VALUES:
+
+1. CURRENCY VALUES - Always include currency symbol:
+   - Revenue: "$15,000" or "€15,000"
+   - Budget: "$50,000" or "€50,000"
+   - Total Addressable Market: "$2.5M" or "€2.5M"
+
+2. PERCENTAGES - Always include % symbol:
+   - Conversion rates: "15%"
+   - ROI: "250%"
+   - Confidence scores: "85%"
+
+3. COUNTS/QUANTITIES - Always specify what is being counted:
+   - MQL Target: "2,500 leads" (Marketing Qualified Leads)
+   - SQL Target: "500 leads" (Sales Qualified Leads)
+   - Expected Reach: "150,000 companies" or "150,000 potential customers"
+   - Total Opportunities: "12 opportunities"
+
+4. TIME VALUES - Use readable format:
+   - Start Time: "2025-03-01 09:00:00"
+   - End Time: "2025-12-31 17:00:00"
+   - Duration: "45 minutes" or "2.5 hours"
+
+5. ACRONYM DEFINITIONS - Always explain acronyms:
+   - MQL = Marketing Qualified Lead
+   - SQL = Sales Qualified Lead
+   - CAC = Customer Acquisition Cost
+   - ROMI = Return on Marketing Investment
+   - LTV = Lifetime Value
+   - CTR = Click-Through Rate
+
+6. SYSTEM METRICS - Include units:
+   - Memory Usage: "50%" (not 0.5)
+   - CPU Usage: "75%"
+   - Performance Score: "85%"
+
+7. DATES - Use current year (2025) and future dates:
+   - Campaign Start: "2025-03-01"
+   - Campaign End: "2025-12-31"
+   - Milestone Date: "2025-06-15"
+
+FORMAT YOUR OUTPUT AS JSON WITH THESE REQUIREMENTS:
+- All monetary values must include currency symbol
+- All percentages must include % symbol
+- All counts must specify what is being counted
+- All acronyms must be defined in the output
+- All timestamps must be in readable datetime format
+- All system metrics must be in percentage format
+
+EXAMPLE FORMAT:
 {{
-    "campaign_plan": {{
-        "campaign_name": "string",
-        "target_audience": {{
-            "segments": ["list of segments"],
-            "total_addressable_market": "number"
-        }},
-        "strategy": {{
-            "key_messaging": ["list of messages"],
-            "value_proposition": "string",
-            "competitive_positioning": "string"
-        }},
-        "channels": [
-            {{
-                "channel": "string",
-                "budget_allocation": "number",
-                "expected_reach": "number"
-            }}
-        ],
-        "timeline": {{
-            "start_date": "string",
-            "end_date": "string",
-            "milestones": ["list of milestones"]
-        }},
-        "budget": {{
-            "total_budget": "number",
-            "breakdown": "object"
-        }},
-        "success_metrics": {{
-            "kpis": ["list of KPIs"],
-            "targets": "object"
-        }}
-    }},
-    "projected_results": {{
-        "expected_revenue": "number",
-        "roi": "number",
-        "conversion_rate": "number"
-    }},
-    "recommendations": [
-        "list of implementation recommendations"
-    ]
+  "campaign_name": "EnergyTech Innovation Summit 2025",
+  "total_addressable_market": "$2.5M",
+  "expected_reach": "150,000 potential customers",
+  "mql_target": "2,500 leads (Marketing Qualified Leads)",
+  "sql_target": "500 leads (Sales Qualified Leads)",
+  "cac_target": "$150 per lead (Customer Acquisition Cost)",
+  "romi_target": "300% (Return on Marketing Investment)",
+  "start_time": "2025-03-01 09:00:00",
+  "end_time": "2025-12-31 17:00:00",
+  "budget_allocation": {{
+    "digital_marketing": "$400,000",
+    "events": "$300,000",
+    "content_creation": "$200,000"
+  }}
 }}
 """
     
@@ -641,34 +747,74 @@ Please provide a comprehensive financial analysis including:
 6. Financial Recommendations
 7. Quarterly Forecasts
 
-Format your response as a JSON object with the following structure:
+CRITICAL REQUIREMENTS FOR ALL NUMERICAL VALUES:
+
+1. CURRENCY VALUES - Always include currency symbol:
+   - Revenue: "$15,000" or "€15,000"
+   - Costs: "$5,000" or "€5,000"
+   - Budget: "$50,000" or "€50,000"
+   - NPV: "$100,000" or "€100,000"
+
+2. PERCENTAGES - Always include % symbol:
+   - ROI: "250%"
+   - Growth rate: "15%"
+   - Profit margin: "25%"
+   - IRR: "18%"
+
+3. COUNTS/QUANTITIES - Always specify what is being counted:
+   - Payback period: "2.5 years"
+   - Project duration: "12 months"
+   - Customer count: "500 customers"
+
+4. TIME VALUES - Use readable format:
+   - Payback period: "2.5 years"
+   - Project timeline: "12 months"
+   - Forecast period: "2025-2026"
+
+5. ACRONYM DEFINITIONS - Always explain acronyms:
+   - ROI = Return on Investment
+   - NPV = Net Present Value
+   - IRR = Internal Rate of Return
+   - EBITDA = Earnings Before Interest, Taxes, Depreciation, and Amortization
+   - ARR = Annual Recurring Revenue
+
+6. SYSTEM METRICS - Include units:
+   - Memory Usage: "50%" (not 0.5)
+   - CPU Usage: "75%"
+   - Performance Score: "85%"
+
+7. DATES - Use current year (2025) and future dates:
+   - Analysis Date: "2025-08-07"
+   - Forecast Period: "2025-2026"
+   - Project Start: "2025-03-01"
+
+FORMAT YOUR OUTPUT AS JSON WITH THESE REQUIREMENTS:
+- All monetary values must include currency symbol
+- All percentages must include % symbol
+- All counts must specify what is being counted
+- All acronyms must be defined in the output
+- All timestamps must be in readable datetime format
+- All system metrics must be in percentage format
+
+EXAMPLE FORMAT:
 {{
-    "financial_performance": {{
-        "current_revenue": "number",
-        "profit_margin": "number",
-        "growth_rate": "number",
-        "key_metrics": "object"
-    }},
-    "roi_analysis": {{
-        "total_roi": "number",
-        "payback_period": "number",
-        "net_present_value": "number",
-        "internal_rate_of_return": "number"
-    }},
-    "projections": {{
-        "q1_2025": "financial_metrics",
-        "q2_2025": "financial_metrics",
-        "q3_2025": "financial_metrics",
-        "q4_2025": "financial_metrics"
-    }},
-    "risk_assessment": {{
-        "risk_level": "low/medium/high",
-        "risk_factors": ["list of factors"],
-        "mitigation_strategies": ["list of strategies"]
-    }},
-    "recommendations": [
-        "list of financial recommendations"
-    ]
+  "financial_performance": {{
+    "current_revenue": "$15M",
+    "profit_margin": "25%",
+    "growth_rate": "15%"
+  }},
+  "roi_analysis": {{
+    "total_roi": "250% (Return on Investment)",
+    "payback_period": "2.5 years",
+    "npv": "$100,000 (Net Present Value)",
+    "irr": "18% (Internal Rate of Return)"
+  }},
+  "projections": {{
+    "q1_2025": {{
+      "revenue": "$4M",
+      "growth": "12%"
+    }}
+  }}
 }}
 """
     
