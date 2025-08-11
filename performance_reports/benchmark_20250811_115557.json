@@ -1,0 +1,28 @@
+{
+  "total_queries": 3,
+  "successful_queries": 3,
+  "success_rate": 100.0,
+  "average_execution_time": 66.33676664034526,
+  "min_execution_time": 54.36964726448059,
+  "max_execution_time": 75.05820894241333,
+  "detailed_results": [
+    {
+      "query": "Which region has the highest gross margin?",
+      "execution_time": 75.05820894241333,
+      "status": "success",
+      "result_size": 16440
+    },
+    {
+      "query": "What are our top 3 revenue products?",
+      "execution_time": 69.58244371414185,
+      "status": "success",
+      "result_size": 27684
+    },
+    {
+      "query": "Show me our lead funnel performance",
+      "execution_time": 54.36964726448059,
+      "status": "success",
+      "result_size": 2670
+    }
+  ]
+}

@@ -121,25 +121,55 @@ class PerformanceDashboard:
         st.header("⚡ Execution Performance")
         if data['executions']:
             df_executions = pd.DataFrame(data['executions'])
-            df_executions['timestamp'] = pd.to_datetime(df_executions['timestamp'], format='%Y%m%d_%H%M%S')
             
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                # Execution time trend
-                fig_time = px.line(df_executions, x='timestamp', y='execution_time', 
-                                 title="Execution Time Trend",
-                                 labels={'execution_time': 'Time (seconds)', 'timestamp': 'Date'})
-                st.plotly_chart(fig_time, use_container_width=True)
-            
-            with col2:
-                # Success rate
-                success_rate = (df_executions['status'] == 'success').mean() * 100
-                st.metric("Success Rate", f"{success_rate:.1f}%")
+            # Fix timestamp parsing - handle different formats gracefully
+            try:
+                # Try to parse timestamps, but handle errors gracefully
+                df_executions['timestamp'] = pd.to_datetime(
+                    df_executions['timestamp'], 
+                    format='%Y%m%d_%H%M%S', 
+                    errors='coerce'
+                )
                 
-                # Average execution time
-                avg_time = df_executions['execution_time'].mean()
-                st.metric("Average Execution Time", f"{avg_time:.2f} seconds")
+                # If parsing failed, try alternative formats
+                if df_executions['timestamp'].isna().any():
+                    # Try to parse as Unix timestamp or other formats
+                    df_executions['timestamp'] = pd.to_datetime(
+                        df_executions['timestamp'], 
+                        errors='coerce'
+                    )
+                
+                # Filter out rows where timestamp parsing failed
+                df_executions = df_executions.dropna(subset=['timestamp'])
+                
+            except Exception as e:
+                st.warning(f"⚠️ Timestamp parsing issue: {e}")
+                # Continue without timestamp conversion
+                df_executions['timestamp'] = df_executions['timestamp'].astype(str)
+            
+            if not df_executions.empty:
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    # Execution time trend (only if we have valid timestamps)
+                    if pd.api.types.is_datetime64_any_dtype(df_executions['timestamp']):
+                        fig_time = px.line(df_executions, x='timestamp', y='execution_time', 
+                                         title="Execution Time Trend",
+                                         labels={'execution_time': 'Time (seconds)', 'timestamp': 'Date'})
+                        st.plotly_chart(fig_time, use_container_width=True)
+                    else:
+                        st.info("📊 Execution time trend chart requires valid timestamps")
+                
+                with col2:
+                    # Success rate
+                    success_rate = (df_executions['status'] == 'success').mean() * 100
+                    st.metric("Success Rate", f"{success_rate:.1f}%")
+                    
+                    # Average execution time
+                    avg_time = df_executions['execution_time'].mean()
+                    st.metric("Average Execution Time", f"{avg_time:.2f} seconds")
+            else:
+                st.info("📊 No valid execution data available for charts")
         
         # Agent Performance
         st.header("🤖 Agent Performance")
