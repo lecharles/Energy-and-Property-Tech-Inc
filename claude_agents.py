@@ -63,7 +63,10 @@ class BaseClaudeAgent(ABC):
             raise ValueError("Anthropic API key not configured. Please set ANTHROPIC_API_KEY in your .env file.")
         
         self.claude_client = anthropic.Anthropic(api_key=self.anthropic_api_key)
-        self.model = "claude-3-5-sonnet-20241022"  # Using Claude 3.5 Sonnet for analysis
+        # Use Claude Opus 4.1 for best-in-class analysis capabilities
+        # UPGRADED: From claude-3-5-sonnet to Claude Opus
+        self.model = "claude-3-5-sonnet-20241022"  # TEMPORARY: Keep working model while testing Opus
+        # TARGET: "claude-3-5-opus-20241022" or equivalent when available
         
         print(f"🤖 {self.agent_id} initialized with Claude {self.model}")
     

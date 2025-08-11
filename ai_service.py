@@ -73,9 +73,9 @@ class AIService:
         # Initialize OpenAI client for API communication
         self.client = openai.OpenAI(api_key=self.openai_api_key)
         
-        # Use GPT-4o-mini for cost-effective, reliable orchestration tasks
+        # Use o3 for superior orchestration capabilities
         # This model provides excellent reasoning capabilities for business analysis
-        self.model = "gpt-4o-mini"
+        self.model = "o3"  # UPGRADED: OpenAI's o3 model for superior orchestration
         
         print(f"🤖 AI Service initialized with model: {self.model}")
     
@@ -333,8 +333,9 @@ class AIService:
                     {"role": "system", "content": "You are an expert business analyst and workflow orchestrator. Always respond with valid JSON."},
                     {"role": "user", "content": prompt}
                 ],
-                temperature=0.3,  # Lower temperature for more consistent, predictable results
-                max_tokens=2000   # Sufficient tokens for detailed orchestration specifications
+                # FIXED: o3 doesn't support temperature parameter - uses default (1)
+                max_completion_tokens=2000,  # FIXED: o3 uses max_completion_tokens instead of max_tokens
+                response_format={"type": "json_object"}
             )
             
             return response.choices[0].message.content.strip()
