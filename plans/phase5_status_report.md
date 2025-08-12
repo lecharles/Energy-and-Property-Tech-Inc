@@ -149,15 +149,15 @@ I need to know:
 
 ### **Immediate Actions**
 1. **Document Current State**: Update all documentation to reflect actual capabilities
-2. **Fix Streamlit Integration**: Connect web interface to core system
-3. **Validate User Experience**: Test actual demo workflow end-to-end
+2. **Validate User Experience**: Test actual demo workflow end-to-end (i wil test this manually with a complex custom query)
 
 ### **Phase 6 Priorities**
-1. **Evaluation Phase**: Focus on business value validation
+1. **Evaluation Phase**: Focus on business value validation, AI Evaluation (factuality, instruction adherence, coherence, halluciations, we need to estasblish a rubic for evals and we will create an "LLM Agent as judge" for the whole system and it will use GPT5)
 2. **Performance Testing**: Comprehensive system testing
 3. **User Feedback**: Gather demo user experience feedback
 
 ### **Phase 7 Priorities**
+0. **Fix Streamlit Integration**: Connect web interface to core system
 1. **Streamlit UI Fixes**: Proper integration with core system
 2. **Real-Time Visualization**: Live execution monitoring
 3. **User Experience**: Professional demo interface
