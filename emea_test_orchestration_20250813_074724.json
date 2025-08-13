@@ -1,0 +1,25 @@
+{
+  "query_analysis": {
+    "complexity": "High - Multi-agent coordination required",
+    "required_agents": [
+      "Operations Summary Agent - Regional analysis",
+      "Upsell Discovery Agent - Product positioning",
+      "Financial Impact Agent - Financial projections",
+      "Campaign Planner Agent - Go-to-market strategy",
+      "Synthesis Agent - Executive summary"
+    ],
+    "data_sources_needed": [
+      "Installed Assets - EMEA regional data",
+      "Products - Product catalog and positioning",
+      "Income Statement - Financial performance",
+      "Lead Funnel - Sales pipeline data"
+    ]
+  },
+  "execution_plan": {
+    "step_1": "Operations Summary - EMEA regional overview",
+    "step_2": "Upsell Discovery - Product opportunity analysis",
+    "step_3": "Financial Impact - Revenue projections",
+    "step_4": "Campaign Planner - Marketing strategy",
+    "step_5": "Synthesis - Executive summary"
+  }
+}
