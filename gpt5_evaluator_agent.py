@@ -30,10 +30,11 @@ logger = logging.getLogger(__name__)
 @dataclass
 class EvaluationCriteria:
     """Evaluation criteria with weights for scoring calculation."""
-    factuality: float = 0.35      # 35% weight
+    factuality: float = 0.30      # 30% weight
+    data_source_validation: float = 0.15  # 15% weight
     instruction_following: float = 0.25  # 25% weight
-    conciseness: float = 0.20     # 20% weight
-    completeness: float = 0.20    # 20% weight
+    conciseness: float = 0.15     # 15% weight
+    completeness: float = 0.15    # 15% weight
 
 
 @dataclass
@@ -44,15 +45,18 @@ class EvaluationResult:
     query: str
     response: str
     factuality_rating: int
+    data_source_validation_rating: int
     instruction_following_rating: int
     conciseness_rating: int
     completeness_rating: int
     factuality_points: float
+    data_source_validation_points: float
     instruction_following_points: float
     conciseness_points: float
     completeness_points: float
     total_score: int
     factuality_comment: str
+    data_source_validation_comment: str
     instruction_following_comment: str
     conciseness_comment: str
     completeness_comment: str
@@ -116,10 +120,11 @@ class GPT5EvaluatorAgent:
 Your primary responsibility is to provide comprehensive, objective evaluation of agent responses across multiple quality dimensions, delivering both quantitative scoring and qualitative feedback to drive continuous improvement in the AI system.
 
 Evaluation Framework:
-- Factuality (1-4 scale, 35% weight): Accuracy, data correctness, hallucinations
+- Factuality (1-4 scale, 30% weight): Accuracy, data correctness, hallucinations
+- Data Source Validation (1-4 scale, 15% weight): Reference to legitimate business data sources
 - Instruction Following (1-4 scale, 25% weight): Query compliance, requirement adherence  
-- Conciseness (1-4 scale, 20% weight): Communication efficiency, focus
-- Completeness (1-4 scale, 20% weight): Coverage, thoroughness, gaps
+- Conciseness (1-4 scale, 15% weight): Communication efficiency, focus
+- Completeness (1-4 scale, 15% weight): Coverage, thoroughness, gaps
 
 Output your evaluation in the exact format specified in the system prompt."""
     
@@ -200,9 +205,11 @@ AGENT RESPONSE:
 
 {self._add_context_info(context) if context else ""}
 
+IMPORTANT: Pay special attention to Data Source Validation - verify that the agent response references legitimate business data sources (Income Statement, Balance Sheet, Cash Flow, Installed Assets, Lead Funnel, Products) rather than making generic statements or hallucinations.
+
 Please provide your evaluation in the exact format specified in the system prompt, including:
 1. The evaluation table with ratings and points
-2. Detailed assessment for each criterion
+2. Detailed assessment for each criterion (especially Data Source Validation)
 3. Overall assessment
 4. Improvement recommendations
 
@@ -289,15 +296,18 @@ Remember to use the 1-4 scale for each criterion and calculate the weighted 1-10
                 query=query,
                 response=response,
                 factuality_rating=ratings.get('factuality', 0),
+                data_source_validation_rating=ratings.get('data_source_validation', 0),
                 instruction_following_rating=ratings.get('instruction_following', 0),
                 conciseness_rating=ratings.get('conciseness', 0),
                 completeness_rating=ratings.get('completeness', 0),
                 factuality_points=0.0,  # Will be calculated later
+                data_source_validation_points=0.0,  # Will be calculated later
                 instruction_following_points=0.0,  # Will be calculated later
                 conciseness_points=0.0,  # Will be calculated later
                 completeness_points=0.0,  # Will be calculated later
                 total_score=0,  # Will be calculated later
                 factuality_comment=comments.get('factuality', ''),
+                data_source_validation_comment=comments.get('data_source_validation', ''),
                 instruction_following_comment=comments.get('instruction_following', ''),
                 conciseness_comment=comments.get('conciseness', ''),
                 completeness_comment=comments.get('completeness', ''),
@@ -416,6 +426,7 @@ Remember to use the 1-4 scale for each criterion and calculate the weighted 1-10
         """
         # Calculate points for each criterion
         result.factuality_points = result.factuality_rating * self.criteria.factuality
+        result.data_source_validation_points = result.data_source_validation_rating * self.criteria.data_source_validation
         result.instruction_following_points = result.instruction_following_rating * self.criteria.instruction_following
         result.conciseness_points = result.conciseness_rating * self.criteria.conciseness
         result.completeness_points = result.completeness_rating * self.criteria.completeness
@@ -423,6 +434,7 @@ Remember to use the 1-4 scale for each criterion and calculate the weighted 1-10
         # Calculate total weighted score (1-10)
         total_points = (
             result.factuality_points +
+            result.data_source_validation_points +
             result.instruction_following_points +
             result.conciseness_points +
             result.completeness_points
@@ -558,6 +570,7 @@ def main():
         print(f"\n📊 Evaluation Results:")
         print(f"Total Score: {result.total_score}/10")
         print(f"Factuality: {result.factuality_rating}/4")
+        print(f"Data Source Validation: {result.data_source_validation_rating}/4")
         print(f"Instruction Following: {result.instruction_following_rating}/4")
         print(f"Conciseness: {result.conciseness_rating}/4")
         print(f"Completeness: {result.completeness_rating}/4")

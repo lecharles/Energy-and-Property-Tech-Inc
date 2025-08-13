@@ -30,10 +30,10 @@ Create an intelligent evaluation system that can:
 ### **Primary Evaluation Criteria**
 
 #### **1. Factuality (1-4 Scale)**
-- **1 - Very Poor**: Significant factual errors, hallucinations, incorrect data
-- **2 - Poor**: Multiple factual inaccuracies, some hallucinations
-- **3 - Good**: Mostly accurate with minor factual issues
-- **4 - Very Good**: Highly accurate, factually correct, well-grounded
+- **1 - Very Poor**: Significant factual errors, hallucinations, incorrect data, no data source validation
+- **2 - Poor**: Multiple factual inaccuracies, some hallucinations, limited data source validation
+- **3 - Good**: Mostly accurate with minor factual issues, some data source validation
+- **4 - Very Good**: Highly accurate, factually correct, well-grounded, comprehensive data source validation
 
 #### **2. Instruction Following (1-4 Scale)**
 - **1 - Very Poor**: Completely ignores or misinterprets instructions
@@ -53,13 +53,20 @@ Create an intelligent evaluation system that can:
 - **3 - Good**: Covers most requirements with minor gaps
 - **4 - Very Good**: Comprehensive coverage of all requirements
 
+#### **5. Data Source Validation (1-4 Scale)**
+- **1 - Very Poor**: No reference to business data sources, pure speculation, hallucinations
+- **2 - Poor**: Limited data source references, mostly generic statements
+- **3 - Good**: Some specific data source references, partial grounding in business data
+- **4 - Very Good**: Comprehensive data source validation, specific references to business data sources
+
 ### **Quantitative Assessment**
 - **Scale**: 1-10 (whole numbers only)
 - **Weighting**: 
-  - Factuality: 35% (3.5 points max)
+  - Factuality: 30% (3.0 points max)
   - Instruction Following: 25% (2.5 points max)
-  - Conciseness: 20% (2.0 points max)
-  - Completeness: 20% (2.0 points max)
+  - Conciseness: 15% (1.5 points max)
+  - Completeness: 15% (1.5 points max)
+  - Data Source Validation: 15% (1.5 points max)
 
 ### **Qualitative Assessment**
 - **Format**: Detailed explanation of scoring decisions
@@ -82,8 +89,9 @@ Create an intelligent evaluation system that can:
 ### **Input Processing**
 - **Query Context**: Full user query and conversation context
 - **Agent Response**: Complete response from evaluated agent
-- **Data Sources**: Reference to business data used
+- **Data Sources**: Reference to business data used and validation of data source grounding
 - **Agent Type**: Identification of agent specialization
+- **Business Data Validation**: Verification that responses reference legitimate business data sources
 
 ### **Output Format**
 - **Structured Table**: Consistent evaluation matrix
@@ -103,9 +111,10 @@ Create an intelligent evaluation system that can:
 
 ### **Step 2: Response Assessment**
 1. **Factuality Check**: Verify accuracy against business data
-2. **Instruction Compliance**: Check adherence to query requirements
-3. **Communication Quality**: Assess clarity and conciseness
-4. **Completeness Review**: Verify all aspects were addressed
+2. **Data Source Validation**: Verify responses reference legitimate business data sources
+3. **Instruction Compliance**: Check adherence to query requirements
+4. **Communication Quality**: Assess clarity and conciseness
+5. **Completeness Review**: Verify all aspects were addressed
 
 ### **Step 3: Scoring and Feedback**
 1. **Apply Scoring Rubric**: Use standardized evaluation criteria

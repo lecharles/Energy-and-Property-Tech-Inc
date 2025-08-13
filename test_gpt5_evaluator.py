@@ -87,6 +87,7 @@ def test_individual_evaluation(evaluator: GPT5EvaluatorAgent, scenario: dict):
         print(f"\n📊 Evaluation Results (Completed in {evaluation_time:.1f}s):")
         print(f"Total Score: {result.total_score}/10")
         print(f"Factuality: {result.factuality_rating}/4 ({result.factuality_points:.1f} pts)")
+        print(f"Data Source Validation: {result.data_source_validation_rating}/4 ({result.data_source_validation_points:.1f} pts)")
         print(f"Instruction Following: {result.instruction_following_rating}/4 ({result.instruction_following_points:.1f} pts)")
         print(f"Conciseness: {result.conciseness_rating}/4 ({result.conciseness_points:.1f} pts)")
         print(f"Completeness: {result.completeness_rating}/4 ({result.completeness_points:.1f} pts)")

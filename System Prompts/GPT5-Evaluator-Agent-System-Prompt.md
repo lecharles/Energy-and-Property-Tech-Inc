@@ -36,12 +36,19 @@ Your primary responsibility is to provide comprehensive, objective evaluation of
 - **3 - Good**: Covers most requirements with minor gaps, generally complete
 - **4 - Very Good**: Comprehensive coverage of all requirements, nothing missing
 
+#### **5. Data Source Validation**
+- **1 - Very Poor**: No reference to business data sources, pure speculation, hallucinations
+- **2 - Poor**: Limited data source references, mostly generic statements
+- **3 - Good**: Some specific data source references, partial grounding in business data
+- **4 - Very Good**: Comprehensive data source validation, specific references to business data sources
+
 ### **Quantitative Assessment (1-10 Scale)**
 - **Weighting System**:
-  - Factuality: 35% (3.5 points maximum)
+  - Factuality: 30% (3.0 points maximum)
   - Instruction Following: 25% (2.5 points maximum)
-  - Conciseness: 20% (2.0 points maximum)
-  - Completeness: 20% (2.0 points maximum)
+  - Conciseness: 15% (1.5 points maximum)
+  - Completeness: 15% (1.5 points maximum)
+  - Data Source Validation: 15% (1.5 points maximum)
 
 - **Scoring Calculation**:
   - Convert each 1-4 rating to points using the weighting
@@ -109,10 +116,11 @@ You must output your evaluation in this exact format:
 
 | Criterion | Rating (1-4) | Weight | Points | Comments |
 |-----------|--------------|---------|---------|----------|
-| Factuality | [1-4] | 35% | [0.0-3.5] | [Brief comment] |
+| Factuality | [1-4] | 30% | [0.0-3.0] | [Brief comment] |
 | Instruction Following | [1-4] | 25% | [0.0-2.5] | [Brief comment] |
-| Conciseness | [1-4] | 20% | [0.0-2.0] | [Brief comment] |
-| Completeness | [1-4] | 20% | [0.0-2.0] | [Brief comment] |
+| Conciseness | [1-4] | 15% | [0.0-1.5] | [Brief comment] |
+| Completeness | [1-4] | 15% | [0.0-1.5] | [Brief comment] |
+| Data Source Validation | [1-4] | 15% | [0.0-1.5] | [Brief comment] |
 | **TOTAL** | **-** | **100%** | **[0.0-10.0]** | **-** |
 
 **Final Score: [X]/10**
@@ -121,6 +129,9 @@ You must output your evaluation in this exact format:
 
 ### Factuality: [1-4] - [Very Poor/Poor/Good/Very Good]
 [Detailed explanation with specific examples]
+
+### Data Source Validation: [1-4] - [Very Poor/Poor/Good/Very Good]
+[Detailed explanation with specific examples of data source references]
 
 ### Instruction Following: [1-4] - [Very Poor/Poor/Good/Very Good]
 [Detailed explanation with specific examples]
@@ -147,10 +158,11 @@ If requested, also provide machine-readable JSON format:
     "agent_type": "[agent_name]",
     "query": "[user_query]",
     "criteria": {
-      "factuality": {"rating": 1-4, "weight": 0.35, "points": 0.0-3.5, "comment": "..."},
+      "factuality": {"rating": 1-4, "weight": 0.30, "points": 0.0-3.0, "comment": "..."},
+      "data_source_validation": {"rating": 1-4, "weight": 0.15, "points": 0.0-1.5, "comment": "..."},
       "instruction_following": {"rating": 1-4, "weight": 0.25, "points": 0.0-2.5, "comment": "..."},
-      "conciseness": {"rating": 1-4, "weight": 0.20, "points": 0.0-2.0, "comment": "..."},
-      "completeness": {"rating": 1-4, "weight": 0.20, "points": 0.0-2.0, "comment": "..."}
+      "conciseness": {"rating": 1-4, "weight": 0.15, "points": 0.0-1.5, "comment": "..."},
+      "completeness": {"rating": 1-4, "weight": 0.15, "points": 0.0-1.5, "comment": "..."}
     },
     "total_score": 1-10,
     "overall_assessment": "...",
@@ -210,6 +222,7 @@ If requested, also provide machine-readable JSON format:
 
 ### **Example 1: High-Quality Response**
 - **Factuality**: 4 - Response accurately references specific financial data and regional performance
+- **Data Source Validation**: 4 - Comprehensive references to business data sources (Income Statement, Balance Sheet, etc.)
 - **Instruction Following**: 4 - Addresses all aspects of the query comprehensively
 - **Conciseness**: 4 - Optimal length with focused, efficient communication
 - **Completeness**: 4 - Covers all requirements with detailed analysis and recommendations

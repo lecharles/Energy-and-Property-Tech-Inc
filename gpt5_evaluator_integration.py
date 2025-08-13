@@ -252,6 +252,7 @@ class GPT5EvaluatorIntegration:
         for result in recent_results:
             report += f"### {result.agent_type} - {result.timestamp}\n"
             report += f"- **Score**: {result.total_score}/10\n"
+            report += f"- **Data Source Validation**: {result.data_source_validation_rating}/4\n"
             report += f"- **Query**: {result.query[:100]}...\n"
             report += f"- **Overall Assessment**: {result.overall_assessment[:200]}...\n\n"
         
