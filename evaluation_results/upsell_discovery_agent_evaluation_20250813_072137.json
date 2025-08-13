@@ -1,0 +1,32 @@
+{
+  "timestamp": "2025-08-13T07:21:37.263600",
+  "agent_type": "Upsell Discovery Agent",
+  "query": "Identify upsell opportunities in EMEA",
+  "response": "EMEA region shows significant upsell potential with 45% of customers having only basic product packages.",
+  "factuality_rating": 2,
+  "data_source_validation_rating": 1,
+  "instruction_following_rating": 2,
+  "conciseness_rating": 4,
+  "completeness_rating": 1,
+  "factuality_points": 0.6,
+  "data_source_validation_points": 0.15,
+  "instruction_following_points": 0.5,
+  "conciseness_points": 0.6,
+  "completeness_points": 0.15,
+  "total_score": 2,
+  "factuality_comment": "2 - Poor\nThe response asserts \u201c45% of customers having only basic product packages\u201d without citing any business data source. While it could be true, it is unsupported and therefore unreliable. The general claim \u201cEMEA region shows significant upsell potential\u201d is non-specific and cannot be verified against known data sets.",
+  "data_source_validation_comment": "1 - Very Poor\nNo data sources are cited. For an Upsell Discovery task, the agent should reference:\n- Installed Assets: Count of EMEA customers by product tier (basic/standard/premium), installed base by account, upgrade eligibility.\n- Products: Definitions of \u201cbasic\u201d package vs higher tiers and associated SKUs.\n- Lead Funnel: Existing cross-sell/upsell pipeline in EMEA and conversion rates by stage.\n- Income Statement: EMEA revenue mix by product to size potential uplift.\n- Balance Sheet/Cash Flow: Not strictly required for identification but could validate inventory or fulfillment capacity if proposing hardware upsells.\nThe response provides neither numbers nor source linkage, and the 45% figure appears fabricated in context.",
+  "instruction_following_comment": "2 - Poor\nThe instruction was to identify upsell opportunities in EMEA. The response only gives a single, high-level statement and a percentage. It does not:\n- Identify which products or tiers to upsell.\n- Segment by country, vertical, or customer size within EMEA.\n- Quantify revenue impact, customer counts, or timelines.\n- Provide actionable next steps.",
+  "conciseness_comment": "4 - Very Good\nThe response is succinct and on-topic. However, brevity is offset by lack of substance.",
+  "completeness_comment": "1 - Very Poor\nKey elements are missing:\n- Specific opportunities (e.g., basic-to-standard upgrades for Product X; cross-sell of Add-on Y to customers with Asset Z).\n- Target cohorts (e.g., customers with >12 months tenure, high utilization, or expiring contracts).\n- Sizing (customer counts, ARR uplift, expected conversion).\n- Prioritization by EMEA sub-regions or industries.\n- Evidence from Installed Assets and Lead Funnel.\n\n## Overall Assessment\nThe response is concise but lacks evidential grounding and actionable detail. It neither cites business data sources nor translates the claim into concrete upsell motions or quantified impact. For an Upsell Discovery Agent, grounding insights in Installed Assets and Lead Funnel data, aligning to the Products catalog, and sizing impact using financial data are essential. As-is, the statement risks being a generic assertion with a potentially hallucinated percentage.\n\n## Improvement Recommendations\n- Cite sources explicitly: \u201cInstalled Assets (EMEA, June 2025): 2,340 basic-tier customers out of 5,200 total (45%).\u201d\n- Define \u201cbasic package\u201d using the Products catalog and list upgrade paths (e.g., Basic -> Pro with Add-on Analytics, SKU P-201 + A-310).\n- Quantify opportunity: customer counts, ARPU uplift, ARR impact, and expected conversion using Lead Funnel benchmarks.\n- Segment and prioritize: top 3 EMEA sub-regions or industries with highest density of basic-tier customers and highest historical upgrade rates.\n- Provide actionable plays: trigger criteria (tenure > 9 months, high utilization, support tickets indicating advanced needs), offer constructs, and next-best-action sequences.\n- Validate feasibility: note capacity or inventory constraints if relevant (Balance Sheet/Cash Flow) and timing considerations.\n- Include data snapshots or links to dashboards for traceability (Installed Assets, Lead Funnel, Income Statement by region).",
+  "overall_assessment": "No comment provided",
+  "improvement_recommendations": [
+    "- Cite sources explicitly: \u201cInstalled Assets (EMEA, June 2025): 2,340 basic-tier customers out of 5,200 total (45%).\u201d",
+    "- Define \u201cbasic package\u201d using the Products catalog and list upgrade paths (e.g., Basic -> Pro with Add-on Analytics, SKU P-201 + A-310).",
+    "- Quantify opportunity: customer counts, ARPU uplift, ARR impact, and expected conversion using Lead Funnel benchmarks.",
+    "- Segment and prioritize: top 3 EMEA sub-regions or industries with highest density of basic-tier customers and highest historical upgrade rates.",
+    "- Provide actionable plays: trigger criteria (tenure > 9 months, high utilization, support tickets indicating advanced needs), offer constructs, and next-best-action sequences.",
+    "- Validate feasibility: note capacity or inventory constraints if relevant (Balance Sheet/Cash Flow) and timing considerations.",
+    "- Include data snapshots or links to dashboards for traceability (Installed Assets, Lead Funnel, Income Statement by region)."
+  ]
+}

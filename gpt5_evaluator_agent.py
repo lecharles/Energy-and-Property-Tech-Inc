@@ -12,6 +12,7 @@ Phase: 6 - Evaluation Phase
 
 import json
 import logging
+import os
 import time
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Any
@@ -93,9 +94,9 @@ class GPT5EvaluatorAgent:
         self.client = OpenAI(api_key=api_key)
         self.criteria = EvaluationCriteria()
         
-        # Validate model is GPT-5 variant
-        if not model.startswith("gpt-5"):
-            raise ValueError("GPT5 Evaluator Agent requires GPT-5 model variants only")
+        # Validate model is GPT-5 variant or GPT-4o (as fallback)
+        if not (model.startswith("gpt-5") or model.startswith("gpt-4o")):
+            raise ValueError("GPT5 Evaluator Agent requires GPT-5 or GPT-4o model variants only")
         
         logger.info(f"GPT5 Evaluator Agent initialized with model: {model}")
         
@@ -243,9 +244,7 @@ Remember to use the 1-4 scale for each criterion and calculate the weighted 1-10
                     {"role": "system", "content": self.load_system_prompt()},
                     {"role": "user", "content": prompt}
                 ],
-                temperature=0.1,  # Low temperature for consistent evaluation
-                max_tokens=2000,  # Sufficient tokens for detailed evaluation
-                timeout=60  # 60 second timeout
+                timeout=120  # 120 second timeout
             )
             
             evaluation_text = response.choices[0].message.content
@@ -336,6 +335,13 @@ Remember to use the 1-4 scale for each criterion and calculate the weighted 1-10
                         ratings['factuality'] = int(parts[2])
                     except ValueError:
                         pass
+            elif '|' in line and 'Data Source Validation' in line:
+                parts = [p.strip() for p in line.split('|')]
+                if len(parts) >= 3:
+                    try:
+                        ratings['data_source_validation'] = int(parts[2])
+                    except ValueError:
+                        pass
             elif '|' in line and 'Instruction Following' in line:
                 parts = [p.strip() for p in line.split('|')]
                 if len(parts) >= 3:
@@ -365,6 +371,10 @@ Remember to use the 1-4 scale for each criterion and calculate the weighted 1-10
             if factuality_match:
                 ratings['factuality'] = int(factuality_match.group(1))
             
+            data_source_match = re.search(r'Data Source Validation.*?(\d)', evaluation_text)
+            if data_source_match:
+                ratings['data_source_validation'] = int(data_source_match.group(1))
+            
             instruction_match = re.search(r'Instruction Following.*?(\d)', evaluation_text)
             if instruction_match:
                 ratings['instruction_following'] = int(instruction_match.group(1))
@@ -377,6 +387,13 @@ Remember to use the 1-4 scale for each criterion and calculate the weighted 1-10
             if completeness_match:
                 ratings['completeness'] = int(completeness_match.group(1))
         
+        # Ensure all required ratings are present with defaults
+        required_ratings = ['factuality', 'data_source_validation', 'instruction_following', 'conciseness', 'completeness']
+        for rating in required_ratings:
+            if rating not in ratings:
+                ratings[rating] = 0
+                logger.warning(f"Missing rating for {rating}, defaulting to 0")
+        
         return ratings
     
     def _extract_comments(self, evaluation_text: str) -> Dict[str, str]:
@@ -388,6 +405,8 @@ Remember to use the 1-4 scale for each criterion and calculate the weighted 1-10
         for section in sections:
             if 'Factuality:' in section:
                 comments['factuality'] = section.split(':', 1)[1].strip() if ':' in section else ''
+            elif 'Data Source Validation:' in section:
+                comments['data_source_validation'] = section.split(':', 1)[1].strip() if ':' in section else ''
             elif 'Instruction Following:' in section:
                 comments['instruction_following'] = section.split(':', 1)[1].strip() if ':' in section else ''
             elif 'Conciseness:' in section:
@@ -396,6 +415,13 @@ Remember to use the 1-4 scale for each criterion and calculate the weighted 1-10
                 comments['completeness'] = section.split(':', 1)[1].strip() if ':' in section else ''
             elif 'Overall Assessment' in section:
                 comments['overall'] = section.split('\n', 1)[1].strip() if '\n' in section else ''
+        
+        # Ensure all required comments are present with defaults
+        required_comments = ['factuality', 'data_source_validation', 'instruction_following', 'conciseness', 'completeness', 'overall']
+        for comment in required_comments:
+            if comment not in comments:
+                comments[comment] = 'No comment provided'
+                logger.warning(f"Missing comment for {comment}, using default")
         
         return comments
     
@@ -478,18 +504,99 @@ Remember to use the 1-4 scale for each criterion and calculate the weighted 1-10
         logger.info(f"Batch evaluation completed: {len(results)}/{len(evaluations)} successful")
         return results
     
-    def save_evaluation_result(self, result: EvaluationResult, filename: str) -> None:
+    def save_batch_evaluation_results(self, results: List[EvaluationResult], batch_name: str = None) -> str:
         """
-        Save evaluation result to a JSON file.
+        Save batch evaluation results with organized storage structure.
+        
+        Args:
+            results: List of EvaluationResult objects
+            batch_name: Optional name for the batch, if None generates timestamped name
+            
+        Returns:
+            Path to saved batch file
+        """
+        try:
+            # Create evaluation_results directory if it doesn't exist
+            evaluation_dir = "evaluation_results"
+            os.makedirs(evaluation_dir, exist_ok=True)
+            
+            # Generate batch filename
+            if batch_name is None:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                batch_name = f"batch_evaluation_{timestamp}"
+            
+            # Ensure .json extension
+            if not batch_name.endswith('.json'):
+                batch_name += '.json'
+            
+            # Full path
+            filepath = os.path.join(evaluation_dir, batch_name)
+            
+            # Prepare batch data
+            batch_data = {
+                "batch_info": {
+                    "timestamp": datetime.now().isoformat(),
+                    "total_evaluations": len(results),
+                    "batch_name": batch_name.replace('.json', '')
+                },
+                "evaluations": [result.to_dict() for result in results],
+                "summary": {
+                    "average_score": sum(r.total_score for r in results) / len(results) if results else 0,
+                    "score_range": {
+                        "min": min(r.total_score for r in results) if results else 0,
+                        "max": max(r.total_score for r in results) if results else 0
+                    },
+                    "agent_types": list(set(r.agent_type for r in results))
+                }
+            }
+            
+            # Save the batch
+            with open(filepath, 'w') as f:
+                json.dump(batch_data, f, indent=2)
+            
+            logger.info(f"Batch evaluation results saved to {filepath}")
+            return filepath
+            
+        except Exception as e:
+            logger.error(f"Failed to save batch evaluation results: {str(e)}")
+            raise
+    
+    def save_evaluation_result(self, result: EvaluationResult, filename: str = None) -> str:
+        """
+        Save evaluation result to a JSON file with organized storage structure.
         
         Args:
             result: EvaluationResult to save
-            filename: Output filename
+            filename: Optional custom filename, if None generates timestamped filename
+            
+        Returns:
+            Path to saved file
         """
         try:
-            with open(filename, 'w') as f:
+            # Create evaluation_results directory if it doesn't exist
+            evaluation_dir = "evaluation_results"
+            os.makedirs(evaluation_dir, exist_ok=True)
+            
+            # Generate filename if not provided
+            if filename is None:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                agent_type_clean = result.agent_type.lower().replace(" ", "_").replace("-", "_")
+                filename = f"{agent_type_clean}_evaluation_{timestamp}.json"
+            
+            # Ensure .json extension
+            if not filename.endswith('.json'):
+                filename += '.json'
+            
+            # Full path
+            filepath = os.path.join(evaluation_dir, filename)
+            
+            # Save the result
+            with open(filepath, 'w') as f:
                 json.dump(result.to_dict(), f, indent=2)
-            logger.info(f"Evaluation result saved to {filename}")
+            
+            logger.info(f"Evaluation result saved to {filepath}")
+            return filepath
+            
         except Exception as e:
             logger.error(f"Failed to save evaluation result: {str(e)}")
             raise
@@ -538,6 +645,87 @@ Remember to use the 1-4 scale for each criterion and calculate the weighted 1-10
             report += f"\n---\n\n"
         
         return report
+    
+    def list_evaluation_results(self, limit: int = 50) -> List[Dict[str, Any]]:
+        """
+        List available evaluation results with metadata.
+        
+        Args:
+            limit: Maximum number of results to return
+            
+        Returns:
+            List of evaluation result metadata
+        """
+        try:
+            evaluation_dir = "evaluation_results"
+            if not os.path.exists(evaluation_dir):
+                return []
+            
+            results = []
+            files = sorted(os.listdir(evaluation_dir), reverse=True)
+            
+            for filename in files[:limit]:
+                if filename.endswith('.json'):
+                    filepath = os.path.join(evaluation_dir, filename)
+                    try:
+                        with open(filepath, 'r') as f:
+                            data = json.load(f)
+                        
+                        # Extract metadata
+                        if isinstance(data, dict):
+                            if 'batch_info' in data:
+                                # Batch evaluation file
+                                metadata = {
+                                    "filename": filename,
+                                    "type": "batch",
+                                    "timestamp": data.get('batch_info', {}).get('timestamp', ''),
+                                    "total_evaluations": data.get('batch_info', {}).get('total_evaluations', 0),
+                                    "batch_name": data.get('batch_info', {}).get('batch_name', ''),
+                                    "average_score": data.get('summary', {}).get('average_score', 0),
+                                    "filepath": filepath
+                                }
+                            else:
+                                # Individual evaluation file
+                                metadata = {
+                                    "filename": filename,
+                                    "type": "individual",
+                                    "timestamp": data.get('timestamp', ''),
+                                    "agent_type": data.get('agent_type', ''),
+                                    "total_score": data.get('total_score', 0),
+                                    "filepath": filepath
+                                }
+                            results.append(metadata)
+                    except Exception as e:
+                        logger.warning(f"Failed to read {filename}: {str(e)}")
+                        continue
+            
+            return results
+            
+        except Exception as e:
+            logger.error(f"Failed to list evaluation results: {str(e)}")
+            return []
+    
+    def get_evaluation_result(self, filename: str) -> Dict[str, Any]:
+        """
+        Retrieve a specific evaluation result by filename.
+        
+        Args:
+            filename: Name of the evaluation file
+            
+        Returns:
+            Evaluation result data
+        """
+        try:
+            filepath = os.path.join("evaluation_results", filename)
+            if not os.path.exists(filepath):
+                raise FileNotFoundError(f"Evaluation file not found: {filename}")
+            
+            with open(filepath, 'r') as f:
+                return json.load(f)
+                
+        except Exception as e:
+            logger.error(f"Failed to retrieve evaluation result {filename}: {str(e)}")
+            raise
 
 
 def main():
@@ -575,9 +763,18 @@ def main():
         print(f"Conciseness: {result.conciseness_rating}/4")
         print(f"Completeness: {result.completeness_rating}/4")
         
-        # Save result
-        evaluator.save_evaluation_result(result, "test_evaluation_result.json")
-        print(f"\n💾 Test evaluation saved to test_evaluation_result.json")
+        # Save result using new storage system
+        saved_filepath = evaluator.save_evaluation_result(result)
+        print(f"\n💾 Test evaluation saved to: {saved_filepath}")
+        
+        # List available evaluation results
+        print(f"\n📁 Available evaluation results:")
+        results_list = evaluator.list_evaluation_results(limit=5)
+        for result_meta in results_list:
+            if result_meta['type'] == 'individual':
+                print(f"   📄 {result_meta['filename']} - {result_meta['agent_type']} (Score: {result_meta['total_score']}/10)")
+            else:
+                print(f"   📊 {result_meta['filename']} - Batch ({result_meta['total_evaluations']} evaluations, Avg: {result_meta['average_score']:.1f}/10)")
         
     except Exception as e:
         print(f"❌ Error: {str(e)}")

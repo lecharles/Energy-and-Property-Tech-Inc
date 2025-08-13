@@ -45,9 +45,7 @@ def test_gpt5_api():
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": "Please respond with 'GPT-5 API test successful' and nothing else."}
-            ],
-            temperature=0.1,
-            max_tokens=50
+            ]
         )
         
         result = response.choices[0].message.content
@@ -66,8 +64,7 @@ def test_gpt5_api():
                     model=model,
                     messages=[
                         {"role": "user", "content": "Hello"}
-                    ],
-                    max_tokens=10
+                    ]
                 )
                 print(f"✅ {model} - Access confirmed")
             except Exception as e:

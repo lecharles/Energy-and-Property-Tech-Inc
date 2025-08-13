@@ -1,0 +1,45 @@
+{
+  "test_suite": "Energy Property AI System - End-to-End Test",
+  "timestamp": "2025-08-13T07:05:02.721107",
+  "duration_seconds": 0,
+  "summary": {
+    "total_tests": 6,
+    "passed_tests": 6,
+    "failed_tests": 0,
+    "success_rate": "100.0%"
+  },
+  "test_results": [
+    {
+      "test": "System Imports",
+      "status": "PASSED",
+      "details": "All core system components imported successfully"
+    },
+    {
+      "test": "GPT5 Evaluator Agent",
+      "status": "PASSED",
+      "details": "Evaluation successful with score 3/10"
+    },
+    {
+      "test": "Specialized Agents",
+      "status": "PASSED",
+      "details": "All specialized agents tested successfully"
+    },
+    {
+      "test": "System Integration",
+      "status": "PASSED",
+      "details": "All system integration components tested successfully"
+    },
+    {
+      "test": "Performance Monitoring",
+      "status": "PASSED",
+      "details": "All performance monitoring components tested successfully"
+    },
+    {
+      "test": "End-to-End Workflow",
+      "status": "PASSED",
+      "details": "Complete workflow execution simulated successfully"
+    }
+  ],
+  "phase": "6 - Evaluation Phase",
+  "status": "COMPLETED"
+}
