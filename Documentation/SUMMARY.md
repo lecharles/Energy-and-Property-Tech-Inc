@@ -2,7 +2,7 @@
 
 ## 📚 Complete Documentation Package
 
-This comprehensive documentation package provides complete understanding of the Energy & Property Tech Inc. Multi-Agent AI System, from high-level concepts to detailed implementation examples.
+This documentation package provides complete understanding of the Energy & Property Tech Inc. Multi-Agent AI System, from high-level concepts to detailed implementation examples.
 
 ## 🗂️ Documentation Structure
 
@@ -138,7 +138,7 @@ python main_integration_v2.py
 # Simple test
 python test_simple_query.py
 
-# Comprehensive test
+# Test
 python comprehensive_emea_test.py
 ```
 
