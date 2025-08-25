@@ -2,7 +2,7 @@
 
 ## 📚 Documentation Overview
 
-Welcome to the documentation for the Energy & Property Tech Inc. Multi-Agent AI System. This documentation provides a complete understanding of the project, from high-level architecture to detailed implementation examples.
+Welcome to the documentation for the Energy & Property Tech Inc. PoC Multi-Agent AI System. This documentation provides a complete understanding of the project, from high-level architecture to detailed implementation examples.
 
 ## 🗂️ Documentation Structure
 
