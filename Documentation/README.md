@@ -2,7 +2,7 @@
 
 ## 📚 Documentation Overview
 
-Welcome to the comprehensive documentation for the Energy & Property Tech Inc. Multi-Agent AI System. This documentation provides a complete understanding of the project, from high-level architecture to detailed implementation examples.
+Welcome to the documentation for the Energy & Property Tech Inc. Multi-Agent AI System. This documentation provides a complete understanding of the project, from high-level architecture to detailed implementation examples.
 
 ## 🗂️ Documentation Structure
 
@@ -83,7 +83,7 @@ python main_integration_v2.py
 # Run a simple test
 python test_simple_query.py
 
-# Run comprehensive test
+# Run test
 python comprehensive_emea_test.py
 ```
 
