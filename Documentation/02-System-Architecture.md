@@ -525,7 +525,7 @@ The system is designed for cloud deployment with:
 
 #### **Data Security**
 - **Data Encryption**: All data encrypted in transit and at rest
-- **Access Logging**: Comprehensive audit trail for all data access
+- **Access Logging**: Audit trail for all data access
 - **Data Validation**: Input validation and sanitization
 
 ### Privacy Protection
